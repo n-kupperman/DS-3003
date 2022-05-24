@@ -1,0 +1,106 @@
+---
+title: "Assignment 4 - Plots (4 pts) & RPub (1 pt)"
+author: "Group #, NAME (UVA computing ID)"
+date: "Due Date: 11:59pm, Jan 6"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+---
+
+```{=html}
+<style>
+h1.title {
+  font-size: 30px;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 { 
+  font-size: 18px;
+}
+
+</style>
+```
+
+# Instructions
+
+- This is an individual assignment. *Submit your `.Rmd` and "knitted"`.html` files through Collab.*
+
+- Upload your `html` file on [RPubs](https://rpubs.com) and include the link when you submit your submission files on Collab. 
+
+- Please don't use `ggplot2` for this assignment. We'll use `ggplot2` almost all the times after this assignment. 
+
+# Part 1 
+
+- Use the occupational experience variable (“oexp”) of the income_example dataset and plot
+ 
+  + a histogram, 
+  + a kernel density estimate, 
+  + a boxplot of “oexp”, 
+  + a set of boxplots showing the distribution of “oexp” by sex crossed with occupational status (“occ”). 
+ 
+- You can either produce four separate but small plots, or you can use par(`mfrow = c(2, 2)`) to create a plotting region consisting of four subplots. 
+
+- **Briefly describe the distributions** of occupational experience in words (also include your plots and the R syntax).
+
+
+[“Play” with the `hist()` and `density()` functions; for instance, by choosing a different number of bins or different break points for the `hist()` function, or different bandwidths using the adjust argument in `density()`. See also the corresponding help files and the examples given there. Only include the histogram and density estimate you find most informative. Also, add useful axis-labels and a title using the following arguments inside the plotting functions: `xlab, ylab, main`. Use the help `?par()` for the description of many more plotting parameter.]
+
+[That’s how the plots could look like – but you have to do it with your group;-)]
+
+![](A4example.png)
+
+
+```{r}
+# add your codes
+```
+
+- *describe your plots.*
+
+
+# Part 2
+
+- Download the SCS Data set from Collab (there you also find a separate file containing a brief description of variables). Then investigate the relationship between the mathematics achievement score (“mathpre”) and the math anxiety score (“mars”) by plotting the data and the path of means. 
+
+(i) Produce a scatterplot between “mathpre” and “mars”. You might consider using `jitter()` or `alpha()` for avoiding overlying points.
+
+```{r}
+# add your codes
+```
+
+(ii) Draw a conditioning plot for female and male students (variable “male”). Include “` | male `” in your first argument to create a conditioning plot.
+```{r}
+# add your codes
+```
+
+(iii) Describe in words the relation between math scores and math anxiety. Do you find evidence of Simpson's Paradox? 
+
+*describe your plots.*
+
+
+# Part 3
+
+- Use a dataset that is available in data repositories (e.g., [kaggle](https://www.kaggle.com/datasets)) 
+
+- Briefly describe the dataset you're using (e.g., means to access data, context, sample, variables, etc...)
+  
+   + *describe your data.*
+   
+- Re-do **Part 2**, i.e., 
+   + produce a scatterplot between “A” and “B”. You might consider using `jitter()` or `alpha()` for avoiding overlying points.
+   + draw a scatterplot plot conditioning on variable “C”. Include “` | C `” in your first argument to create a conditioning plot.
+   + describe in words the relation between "A" and "B." Do you find evidence of Simpson's Paradox?
+
+```{r}
+# add your codes
+```
+
+- You will **present results** of Part 3 to your neighbor(s) in class of **Jan. 7 (Mon)**. 

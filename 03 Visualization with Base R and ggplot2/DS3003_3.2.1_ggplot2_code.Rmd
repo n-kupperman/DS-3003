@@ -1,0 +1,387 @@
+---
+title: "DS3003: ggplot2"
+subtitle: "R codes"
+author: "Youmi Suk"
+date: "1. 24. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+<!--- Change font size for headers --->
+<style>
+h1.title {
+  font-size: 30px;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 { 
+  font-size: 18px;
+}
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, comment=NA)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+library(tidyverse)
+
+par(mar=c(2.1,2.1,.5,1.5), mgp=c(1.3,.3,0), tck=-0.01)
+
+# ::::: read income data :::::
+incex <- read.table('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R intro/income_exmpl.dat', header = T, sep = "\t")
+summary(incex)
+
+# change order of factor levels
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'))
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'))
+incex$sex <- factor(incex$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+```
+
+## ggplot2 Resources
+
+- Perhaps the best (most principled) plotting library around
+- Here are the references/resources.
+
+  + [R4DS -- Data Visualization](https://r4ds.had.co.nz/data-visualisation.html)
+  + [tiidyverse -- learning ggplot2](https://ggplot2.tidyverse.org/#learning-ggplot2)
+  + [R4DS -- Graphics for Communication](https://r4ds.had.co.nz/graphics-for-communication.html)
+  + [R4DS -- scales](https://r4ds.had.co.nz/graphics-for-communication.html#scales)
+  + [R4DS -- rescaling](https://r4ds.had.co.nz/graphics-for-communication.html#replacing-a-scale)
+  + [R Cookbook](http://www.cookbook-r.com/Graphs/)
+  + [tidyverse -- ggplot2](https://ggplot2.tidyverse.org)
+
+## Barplots
+
+```{r}
+ggplot(data=incex) + geom_bar(mapping = aes(x = occ))
+```
+
+- `geom_bar()` uses `stat_count()` by default. We can reproduce the barplot using `stat_count()`. 
+
+```{r}
+ggplot(incex) + stat_count(aes(x = occ))
+```
+
+
+- If you have precomputed data, use `identity` stat.
+
+```{r}
+occ_counted <- incex %>% count(occ, name = 'count') 
+occ_counted
+
+ggplot(occ_counted) + geom_bar(aes(x = occ, y = count), stat = 'identity')
+
+ggplot(occ_counted) + geom_col(aes(x = occ, y = count)) # shortcut
+```
+
+
+- Use `after_stat()` to modify mapping from stats (here we calculate `%`).
+
+```{r}
+ggplot(incex) + geom_bar(aes(x = occ,
+  y = after_stat(100 * count / sum(count))))
+```
+
+- A stacked plot with frequencies
+
+```{r}
+ggplot(occ_counted) + geom_bar(aes(x="", y = count, fill=occ), stat = "identity")
+```
+
+- Based on the vector type of the variable *sex*, a discrete colour scale is picked.
+
+```{r}
+ggplot(incex) + geom_bar(aes(x = occ, fill=sex))
+```
+
+- You may want to change colors.
+
+```{r}
+ggplot(incex) + geom_bar(aes(x = occ, fill=sex)) + 
+  scale_fill_brewer(palette="Dark2")
+```
+
+- You may want to choose colors manually.
+
+```{r}
+ggplot(incex) + geom_bar(aes(x = occ, fill=sex)) + 
+  scale_fill_manual(values=c("#999999", "#E69F00"))
+```
+
+-  A stacked plot with proportions. `position = "fill"` makes “proportion bars”.
+
+```{r}
+ggplot(occ_counted) + geom_bar(aes(x="", y = count, fill=occ), stat = "identity",   position="fill") + labs(y="proportion")
+
+ggplot(incex) + geom_bar(aes(x = occ, fill=sex), position = "fill") + 
+  labs(x="occupational status", y="proportion", title="stacked plot")
+```
+
+
+## Pie Chart
+
+- A polar coordinate system interprets `x` and `y` as radius and angle.
+
+```{r}
+occ_counted <- incex %>% count(occ, name = 'count') 
+p <- ggplot(occ_counted) + geom_bar(aes(x="", y = count, fill=occ), 
+                                    stat = 'identity', width=1)
+p + coord_polar(theta = "y")
+```
+
+- Let's change `theme`. Here, `theme_void()` removes background, grid, numeric labels.
+
+```{r}
+p + coord_polar(theta = "y") +
+  theme_void() 
+```
+
+
+## Histogram
+
+- Draw a histogram with a continuous variable.
+
+```{r}
+ggplot(incex) + geom_histogram(aes(x = income), bins = 20) + theme_minimal()
+```
+
+
+- Density Plot
+
+```{r}
+ggplot(incex) + geom_density(aes(x = income)) + theme_minimal()
+```
+
+- Draw the histogram and density plots together.
+
+```{r}
+ggplot(incex) + geom_histogram(aes(x = income, y=..density..), bins=20) + 
+  geom_density(aes(x = income), col="red") + theme_minimal()
+```
+
+- We can globally define mapping parameters inside `ggplot`.
+
+```{r}
+ggplot(incex, aes(x = income, y=..density..)) + 
+  geom_histogram(bins=20) + geom_density(col="red") + theme_minimal()
+```
+
+- Histogram with groups
+
+```{r}
+ggplot(incex) + geom_histogram(aes(x = income, fill=sex), 
+  bins=20, alpha=0.7) + theme_bw()
+```
+
+## Boxplot
+
+- Draw a boxplot.
+
+```{r}
+ggplot(incex, aes(x = income)) + geom_boxplot() + theme_bw()
+```
+
+- Remove everything on the y-axis including the texts and tick marks.
+
+```{r}
+ggplot(incex, aes(x = income)) + geom_boxplot() + theme_bw() +
+      theme(axis.text.y=element_blank(),
+            axis.ticks.y=element_blank())
+```
+
+- Draw a boxplot by the variable *sex*.
+
+```{r}
+ggplot(incex, aes(x = income, y = sex)) + geom_boxplot() + theme_bw()
+```
+
+## Violin Plot
+
+- A violin plot displays distributions of numeric data for one or more groups using density curves. The width of each curve corresponds with the approximate frequency of data points in each region.
+
+```{r}
+ggplot(incex, aes(x = income, y = sex)) + geom_violin() + theme_bw()
+```
+
+- You may want to overlay data points.
+
+```{r}
+ggplot(incex, aes(x = income, y = sex)) + geom_violin() + 
+  geom_point(alpha=0.2) + theme_bw()
+```
+
+- You may want to jitter data points.
+
+```{r}
+ggplot(incex, aes(x = income, y = sex)) + geom_violin() + 
+  geom_jitter(width = 0.1, height = 0.1, alpha=0.2) + theme_bw()
+```
+
+
+
+## Quantile-Comparison Plot
+
+- Compare the observed (empirical) sample distribution of a
+variable with a theoretical distribution. 
+
+```{r}
+ggplot(incex, aes(sample = income)) + stat_qq() + stat_qq_line() + theme_classic()
+```
+
+
+## Scatterplot
+
+- `geom_point()` with two continuous variables
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + theme_bw()
+```
+
+
+
+- Jittered scatterplot; “jittering” adds a small random quantity (uniformly distributed) to each
+observation.
+
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_jitter() + theme_bw()
+```
+
+
+- Scatterplot with different transparency  levels; `alpha` controls the degree of transparency for data points.
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point(alpha=0.3) + theme_bw()
+```
+
+- Scatterplot with groups; Use the argument `col` or `shape` inside `aes()`.
+
+```{r}
+ggplot(incex, aes(x = age, y = income, col=sex)) + 
+  geom_point(alpha=0.3) + theme_bw()
+
+ggplot(incex, aes(x = age, y = income, shape=sex)) + 
+  geom_point(alpha=0.3) + theme_bw()
+```
+
+
+## Facets
+
+- Two facet functions for splitting data by categories
+
+- `facet_wrap()` : "wraps" a 1d ribbon of panels into 2d.
+
+- `facet_grid()` : produces a 2d grid of panels defined by variables which form the rows and columns.
+
+
+### facet_wrap()
+
+- Use `facet_wrap()` with one categorical variable
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + 
+  facet_wrap(~ sex)
+```
+
+- Use `facet_wrap()` with two categorical variables: *sex* and *edu* 
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + 
+  facet_wrap(sex ~ edu)
+```
+
+- Use `facet_wrap()` with two categorical variables: *occ* and *edu*
+
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + 
+  facet_wrap(occ ~ edu)
+```
+
+### facet_grid()
+
+- Use `facet_grid()` with variables *sex* and *edu*. 
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + 
+  facet_grid(sex ~ edu)
+```
+
+- Use `facet_grid()` with variables *occ* and *edu*. 
+
+```{r}
+ggplot(incex, aes(x = age, y = income)) + geom_point() + 
+  facet_grid(occ ~ edu)
+```
+
+
+
+## Themes
+
+- Try different arguments for `theme`!
+
+```{r}
+ggplot(incex) + geom_bar(aes(y = occ)) + facet_wrap(~ sex) +
+    labs(title = "Number of occupational status by gender",
+         caption = "source: DS3003, Fall 2021",
+         x = NULL,
+         y = NULL) +
+    theme_minimal() +
+    theme(
+      strip.text = element_text(face = 'bold', hjust = 0),
+      plot.caption = element_text(face = 'italic'),
+      panel.grid.major = element_line('white', size = 0.5),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.ontop = TRUE
+    )
+```
+
+
+## Beyond ggplot2
+
+- ggplot2 is huge! About 50 geoms, 25 stats, 60 scales.
+
+- Many extensions are very niche specific and developed by experts in the field.
+
+- 100 registered extensions available to explore (https://exts.ggplot2.tidyverse.org)
+
+- e.g., for plot compositions, you might want to use `gridExtra::grid.arrange()`, `ggpubr::ggarrange()`, `cowplot::plot_grid()`, or `patchwork`.
+
+### Example: package gridExtra
+
+```{r, message=F, out.width='90%', fig.height=3.5, fig.align="center"}
+library(gridExtra)
+p1 <- ggplot(incex) + geom_bar(aes(x = occ, fill=sex)) # barplot
+p2 <- ggplot(incex) + geom_histogram(aes(x=income), bins=10) # histogram
+p3 <- ggplot(incex) + geom_point(aes(x = age, y=income)) # scatterplot
+
+grid.arrange(p1, p2, p3, nrow=1)
+```
+
+
+### Example: package patchwork
+
+```{r, out.width='90%', fig.height=3.6, fig.align="center"}
+library(patchwork)
+p1 + p2 + p3
+( p1 + p2 ) / p3
+```
+
+
+### Example: package GGally
+
+```{r, message=F}
+library(GGally)
+ggpairs(incex[, c('income', 'oexp', 'age', 'edu')])
+```

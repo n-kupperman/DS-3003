@@ -1,0 +1,254 @@
+---
+title: "Visualizing Errors: Error Bars"
+author: "Youmi Suk"
+date: "3. 13. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE, 
+                      fig.align = "center",
+                      out.width = "80%")
+options(width=10000)
+
+library(dplyr)
+library(knitr)
+library(tidyverse)
+library(DT)
+
+path1 <- "/Users/youmisuk/Desktop/DS3003/W8 - Plotly & Plots with CI/"
+path2 <- "/Users/youmisuk/Desktop/DS3003/Assign/"
+```
+
+
+## Bar plots with COVID data
+
+### Bar plots
+
+```{r}
+covids <- read_csv(paste0(path1, "WHO-COVID-19-global-table-data.csv"))
+DT::datatable(covids, options = list(scrollX = T))
+```
+
+```{r}
+focus <- c('Sweden', 'United States of America', 'Denmark', 'Finland', 'Norway', 
+           'Republic of Korea', 'Japan', 'China', 'Viet Nam', 'New Zealand')
+
+covids %>% filter(Name %in% focus) %>% mutate(rate = `Deaths - cumulative total`/`Cases - cumulative total`) %>% 
+ggplot(aes(x=rate, y=Name)) + geom_col() + theme_bw() + xlab('WHO: # Reported Deaths / # Reported Cases')
+```
+
+
+### Error bars
+
+- Theoretical uncertainty in an estimate of a proportion
+
+1. $\textrm{First we use} \; Variance \; \textrm{of a coin flip with probability p:}\; p(1-p)$
+
+2. $\textrm{Then we calculate the} \; Variance \; \textrm{of an average of coin flips:}\; p(1-p)/n$
+
+3. $\textrm{Then we calculate the} \; Standard \; Deviation \; \textrm{of an average of coin flips:}\; \sqrt{p(1-p)/n}$
+
+4. $\textrm{And when you estimate this with the observed sample proprotion it's called the} \; Standard \; Error:\; \sqrt{\hat p(1-\hat p)/n}$
+
+```{r}
+covids2 <- covids %>% filter(Name %in% focus) %>% 
+  mutate(rate = `Deaths - cumulative total`/`Cases - cumulative total`, 
+         SE = sqrt(rate*(1-rate)/`Cases - cumulative total`))
+
+hist(covids2$rate) # histogram of death rates
+```
+
+- Add error bars.
+
+```{r}
+ggplot(covids2, aes(x=rate, y=Name)) + geom_col() + theme_bw() + 
+  xlab('WHO: # Reported Deaths / # Reported Cases') + 
+  geom_errorbar(aes(xmin=rate-1.96*SE, xmax=rate+1.96*SE), width=.2)
+```
+
+- What is driving the degree of uncertainty?
+  - Do we trust these estimates?
+  - How could death rates should vary by country?
+  
+## Bar plots with incex data
+
+- Load data
+
+```{r}
+# load incex data
+incex <- read.table(paste0(path2, 'income_exmpl.dat'), header = T, sep = "\t")
+
+# change order of factor levels
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'))
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'))
+incex$sex <- factor(incex$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+```
+
+- First, summarize the data. This can be done in many ways, as described on [R cookbook](http://www.cookbook-r.com/Manipulating_data/Summarizing_data/). In class, we’ll use the `summarySE()` function below.
+
+```{r}
+## Summarizes data.
+## Gives count, mean, standard deviation, standard error of the mean, and confidence interval (default 95%).
+##   data: a data frame.
+##   measurevar: the name of a column that contains the variable to be summariezed
+##   groupvars: a vector containing names of columns that contain grouping variables
+##   na.rm: a boolean that indicates whether to ignore NA's
+##   conf.interval: the percent range of the confidence interval (default is 95%)
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+    library(plyr)
+
+    # New version of length which can handle NA's: if na.rm==T, don't count them
+    length2 <- function (x, na.rm=FALSE) {
+        if (na.rm) sum(!is.na(x))
+        else       length(x)
+    }
+
+    # This does the summary. For each group's data frame, return a vector with
+    # N, mean, and sd
+    datac <- ddply(data, groupvars, .drop=.drop,
+      .fun = function(xx, col) {
+        c(N    = length2(xx[[col]], na.rm=na.rm),
+          mean = mean   (xx[[col]], na.rm=na.rm),
+          sd   = sd     (xx[[col]], na.rm=na.rm)
+        )
+      },
+      measurevar
+    )
+
+    # Rename the "mean" column    
+    datac <- rename(datac, c("mean" = measurevar))
+
+    datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+
+    # Confidence interval multiplier for standard error
+    # Calculate t-statistic for confidence interval: 
+    # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+    ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+    datac$ci <- datac$se * ciMult
+
+    return(datac)
+}
+```
+
+- Get standard errors and marginal errors. 
+
+   - Margin of error: distance between the point estimate and the lower or upper confidence limit.
+
+```{r}
+incex_grp <- summarySE(incex, measurevar="income", groupvars=c("occ","sex"))
+str(incex_grp)
+kable(incex_grp)
+```
+
+- Use standard error bars of the mean
+
+```{r}
+ggplot(incex_grp, aes(x = occ, y=income, fill=sex)) + 
+    geom_bar(position=position_dodge(), stat="identity") +
+    geom_errorbar(aes(ymin=income-se, ymax=income+se),
+                  width=.2,                    # Width of the error bars
+                  position=position_dodge(.9))
+```
+
+-  Use marginal errors instead of standard errors to construct 95% confidence intervals.
+
+```{r}
+ggplot(incex_grp, aes(x = occ, y=income, fill=sex)) + 
+    geom_bar(position=position_dodge(), stat="identity", col="black", size=.2) +
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  width=.2, # Width of the error bars
+                  size=.3, 
+                  position=position_dodge(.9))
+```
+
+- The graph can be improved using additional functions (e.g., `labs`, `theme_...`, `scale_...`) as:
+
+```{r}
+ggplot(incex_grp, aes(x = occ, y=income, fill=sex)) + 
+    geom_bar(position=position_dodge(), stat="identity",
+             colour="black", # Use black outlines,
+             size=.3) +      # Thinner lines
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  size=.3,    # Thinner lines
+                  width=.2,                    # Width of the error bars
+                  position=position_dodge(.9)) +
+    labs(x="Occupational status", y="Mean income", title="Gender pay gap by occupation status with 95% confidence intervals") +
+    scale_fill_hue(name="Gender", # Legend label, use darker colors
+                   breaks=c("male", "female"),
+                   labels=c("Male", "Female")) +
+    theme_bw()
+```
+
+## Line plots
+
+- We could summarize the above data using a line graph. That is, we could use basic line and point graph with error bars representing either the standard error of the mean, or 95% confidence interval.
+
+```{r}
+# Standard error of the mean
+ggplot(incex_grp, aes(x = occ, y=income, col=sex, group=sex)) + 
+    geom_line() + geom_point() + 
+    geom_errorbar(aes(ymin=income-se, ymax=income+se),
+                  width=.1)
+```
+
+```{r}
+# Standard error of the mean
+ggplot(incex_grp, aes(x = occ, y=income, col=sex, group=sex)) + 
+    geom_line() + geom_point() + 
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  width=.1)
+```
+
+- Use a subset of 50 cases.
+
+```{r}
+set.seed(1)
+incex2 <- sample_n(incex, 50, replace=FALSE) # randomly sample 50 cases.
+
+incex_grp2 <- summarySE(incex2, measurevar="income", groupvars=c("occ","sex"))
+str(incex_grp2)
+kable(incex_grp2)
+```
+
+- Draw error bars.
+
+```{r}
+ggplot(incex_grp2, aes(x = occ, y=income, col=sex, group=sex)) + 
+    geom_line() + geom_point() + 
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  width=.1)
+```
+
+- To avoid overlapped errorbars, use `position_dodge` to move them horizontally.
+
+```{r}
+ggplot(incex_grp2, aes(x = occ, y=income, col=sex, group=sex)) + 
+    geom_line(position=position_dodge(0.1)) + 
+    geom_point(position=position_dodge(0.1)) + 
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  width=.1,
+                  position=position_dodge(0.1))
+```
+
+- Change the size of data points and change the color of error bars. 
+
+```{r}
+ggplot(incex_grp2, aes(x = occ, y=income, col=sex, group=sex)) + 
+    geom_line(position=position_dodge(0.1)) + 
+    geom_point(position=position_dodge(0.1), size=3) + 
+    geom_errorbar(aes(ymin=income-ci, ymax=income+ci),
+                  colour="black",
+                  width=.1,
+                  position=position_dodge(0.1))
+```

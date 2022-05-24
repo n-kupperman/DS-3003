@@ -1,0 +1,36 @@
+---
+title: "Introduction to Shiny: Demo"
+output: slidy_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, out.width = "80%", out.height = "70%")
+library(ggplot2)
+library(shiny)
+library(plotly)
+```
+
+## Shiny with Plotly
+
+- Use `renderPlotly()` in the `server` argument, and use `plotlyOutput()` in the `ui` argument.
+
+```{r}
+shinyApp(
+  ui = fluidPage(
+  sliderInput("span_p", label = "Span adjustment:",
+              min = 0.2, max = 0.9, value = 0.5, step = 0.1),
+  plotlyOutput("irisplot")
+  ),
+  
+  server = function(input, output){
+    output$irisplot <- renderPlotly({
+      
+    p <- ggplot(iris, aes(x=Sepal.Length, y=Sepal.Width)) + geom_point() + geom_smooth(method="loess", formula=y~x, se=FALSE, span=input$span_p) + theme_bw()
+    
+    ggplotly(p)
+    
+      })},
+  options = list(height=600)
+)   
+```

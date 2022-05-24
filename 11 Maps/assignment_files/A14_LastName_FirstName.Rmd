@@ -1,0 +1,53 @@
+---
+title: "A14: Shiny with Maps"
+author: "TYPE YOUR NAME HERE"
+date: "Due Date: 11:59pm, Apr 3"
+output: ioslides_presentation
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(ggmap)
+```
+
+## Individual Homework
+
+- Upload your Shiny app on [ShinyApps.io](https://www.shinyapps.io). Submit your `.Rmd` AND your URL (https://XXXXX.shinyapps.io/XXXXX) on Collab.
+
+- You need to create your favorite city map with a controller for zooming and the sidebar layout.
+
+- If you like, you can change the output type from `ioslides_presentation` to `slidy_presentation`.  
+
+- In your submission file, you should include either of the following statements:
+
+   - "I pledge that I have neither given nor received help on this assignment."
+   - "I have [received/given] help on this assignment [to/from] [student]; the nature of this support was [elaborate]."
+
+
+## Individual Homework (Cont'd)
+
+- Detailed instructions ([Example](https://youmi.shinyapps.io/A14example)):
+
+    - Select your favoriate city, and use `get_map()` and `ggmap()` to draw your favoriate city map from Google Maps.
+
+    - Create a shiny app with a slider (`sliderInput()`) that allows for changing the value for zooming. The min value is 5, the max value is 18, and the default value is 10.  
+    
+    - Use `sidebarLayout()` with `sidebarPanel()` and `mainPanel()` for your shinyapp layout.
+    
+    - Use `shinyApp(ui = ..., server =...)` to create your a shiny app. 
+
+## Individual Homework (Cont'd)
+
+- Don't include your API key in your `Rmd` file. Please delete your API key in your `Rmd` submission file after uploading your shiny app on [ShinyApps.io](https://www.shinyapps.io).
+
+## Map Plot
+
+```{r}
+ui <- # add your codes
+
+server <- # add your codes
+
+shinyApp(ui = ui, server = server, options = list(height = 600)) # if you like, change the height value.
+```

@@ -1,0 +1,100 @@
+---
+title: "Create-Your-Own-Plot Assignment (4 pts per presentation date)"
+author: "TYPE YOUR NAME HERE (UVA computing ID)"
+date: "Due Date: See below"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+---
+
+<style>
+h1.title {
+  font-size: 30px;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 { 
+  font-size: 18px;
+}
+
+</style>
+
+
+You will create your own plot(s) using datasets from presenters to support or argue against their argument. Please modify the given rmd file for your submission.
+
+1. Select two presentations on each presentation date: (i) one where you play a role as a peer reviewer and (ii) the other that you're interested in to draw plots on each presentation date. 
+
+2. You can use a different plot type, or modify the presenter's key plot.
+
+3. In your submission files, you should : 
+   - summarize each presentation (e.g., title, background, plot type).
+   - explain your plot(s) and modifications you've made.
+   - support or argue against each presenter's argument using your key plot. 
+
+4. In your submission files, you should include either of the following statements:
+
+   - "I pledge that I have neither given nor received help on this [examination/quiz/assignment]."
+   - "I have [received/given] help on this assignment [to/from] [student]; the nature of this support was [elaborate]."
+   
+
+5. Add your RMD and HTML files to *Assignment Module*. 
+  
+
+# Assignment 17
+
+ - Due: 11:59pm on Apr 17 (Sunday)
+ - Add your RMD and HTML files (having plots for presentations on Apr 11 and Apr 13) to *A17: Your own plots* under *Assignment Module*. Thus, the max. points are 8 points. 
+ 
+## Create your own plots for two presentations on Apr 11 (4 pts)
+
+### Presentation 1: One where you work as a peer reviewer
+
+### Presentation 2: Choose another one. 
+
+
+## Create your own plots for two presentations on Apr 13 (4 pts)
+ 
+### Presentation 1: One where you work as a peer reviewer
+
+### Presentation 2: Choose another one. 
+
+
+# Assignment 18
+
+ - Due: 11:59pm on Apr 24 (Sunday)
+ - Add your RMD and HTML files (having plots for presentations on Apr 18 and Apr 20) to *A18: Your own plots* under *Assignment Module*. Thus, the max. points are 8 points. 
+ 
+## Create your own plots for two presentations on Apr 18 (4 pts)
+
+ 
+### Presentation 1: One where you work as a peer reviewer
+
+### Presentation 2: Choose another one. 
+
+
+## Create your own plots for two presentations on Apr 20 (4 pts)
+
+### Presentation 1: One where you work as a peer reviewer
+
+### Presentation 2:  Choose another one. 
+
+
+# Assignment 19
+
+ - Due: 11:59pm on May 1 (Sunday)
+ - Add your RMD and HTML files (having plots for presentations on Apr 27) to *A19: Your own plots* under *Assignment Module*. 
+ 
+## Create your own plots for two presentations on Apr 27 (4 pts)
+ 
+### Presentation 1: One where you work as a peer reviewer
+
+### Presentation 2: Choose another one. 

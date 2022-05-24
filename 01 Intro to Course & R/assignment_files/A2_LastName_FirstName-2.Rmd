@@ -1,0 +1,79 @@
+---
+title: "Assignment 2 - Getting Started with R (4 pts)"
+author: "TYPE YOUR NAME HERE (UVA computing ID)"
+date: "Due Date: 11:59pm, Jan 26"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+---
+
+<style>
+h1.title {
+  font-size: 30px;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 { 
+  font-size: 18px;
+}
+
+</style>
+
+**You should submit the html output.**
+
+Note that Reading PASW/SPSS data requires the `read.spss()` function of the *foreign* package (the package should already be installed but you might need to load it using `library(foreign)`, or by checking the box next to the *foreign* package in R Studio). Use `?read.spss` to get some help on the function. Also see the example at the beginning of the *DS3003_introR.R* file.
+
+In order to read the data you need to know where you saved the data set ("inc_real.sav"). Ideally, you save the data in a folder you are going to use. Then you can use the path of the folder to set your working directory (`setwd()`). If you do not know the path of the folder that contains the data, (right)-click on the data file and get the file properties. The file properties contain the path which you can use to set your working directory. Please note that the path can only contain regular slashes ("/") but no back-slashes ("\"). In R studio, you can alternatively set the path via the main menu: Session > Set Working Directory > Choose Directory (then you don’t need the setwd() function to set the directory). Once you set the working directory, everything should work smoothly.
+
+If you like to learn more about Rmarkdown, please see the following websites:
+
+- [R Markdown Cheatsheet](https://www.rstudio.com/resources/cheatsheets/)
+- [R Markdown Reference Guide](https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf)
+- [Introduction to R Markdown by Garrett Grolemund](https://rmarkdown.rstudio.com/articles_intro.html)
+- [Get Started Rmarkdown from RStudio](https://rmarkdown.rstudio.com/lesson-1.html)
+
+
+# Read the csv file "inc_real.sav" (contains real income data) into R and then check the data by doing the following:
+
+- Print the first 6 or 10 rows of the data frame
+- Use `dim()` to determine how many rows and columns the data frame has
+- Get the variable names (use `names()`),
+- Determine the type of variables (numerical, factor, …), i.e., the structure of the data frame (`str()`).
+    
+# Get the summary statistics for the variables in the data frame.
+ 
+- Use `summary()`. Note that the type of statistic automatically changes with the type of data.
+
+```{r}
+
+```
+
+
+# Generate the following sequences using seq() and rep(). 
+
+- Each sequence should have a length of 20 (i.e., 20 numbers), only the first 12 numbers are shown below.
+
+   - 1 0 1 0 1 0 1 0 1 0 1 0 ….
+   - 1 1 0 0 1 1 0 0 1 1 0 0 ….
+   - 0 3 6 9 0 3 6 9 0 3 6 9 ….
+
+```{r}
+
+```
+
+# Plot a histrogram with the income variable from data. 
+
+- Use `hist()`. 
+
+```{r}
+
+```

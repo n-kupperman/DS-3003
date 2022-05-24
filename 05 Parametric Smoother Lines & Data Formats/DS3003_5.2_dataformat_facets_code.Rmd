@@ -1,0 +1,216 @@
+---
+title: "DS3003: Wide to Long Data with `facets` in ggplot2"
+subtitle: "R codes"
+author: "Youmi Suk"
+date: "2. 14. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+
+library(ggplot2)
+library(tidyr)
+library(knitr)
+library(gridExtra)
+```
+
+## Example data 
+
+- Our example data is taken from a much larger dataset collected by the Minneapolis Public School District (MPLS) in minnesota (USA).
+
+- The variables in the data include reading achievement scores from grades 5 to 8, risk group (risk), gender (gen), ethnicity (eth), English language learner status (ell), special education services (sped), and attendance proportion (att).
+
+```{r}
+dat <- read.table("https://studysites.sagepub.com/long/chapters/datasets/82689_01ds2.txt", header=TRUE) # load reading 
+kable(dat)
+```
+
+
+### Relationship between reading scores and attendance proportions
+
+- How can we create scatterplots between each reading score (read.5 to read.8) and attendance proportions (att)?
+
+- First, draw a scatterplot between read.5 to att.
+
+```{r}
+ggplot(dat, aes(x=att, y=read.5)) + geom_point() + theme_bw()
+```
+
+
+- We may want to draw separate scatterplots for different reading measures and combine separate plots by using `gridExtra::grid.arrange()`, `ggpubr::ggarrange()`, `cowplot::plot_grid()`, or `patchwork`.
+
+```{r}
+p1 <- ggplot(dat, aes(x=att, y=read.5)) + geom_point() + labs(title="Grade 5") + theme_bw()
+p2 <- ggplot(dat, aes(x=att, y=read.6)) + geom_point() + labs(title="Grade 6") + theme_bw()
+p3 <- ggplot(dat, aes(x=att, y=read.7)) + geom_point() + labs(title="Grade 7") + theme_bw()
+p4 <- ggplot(dat, aes(x=att, y=read.8)) + geom_point() + labs(title="Grade 8") + theme_bw()
+
+grid.arrange(p1, p2, p3, p4, nrow=1) # from package gridExtra
+```
+
+### Can we do this by using only one `ggplot` function?
+
+- Of course, but we have to change our data format.
+
+```{r}
+dat2 <- gather(dat, key = "grade", value= "read", read.5:read.8)
+ggplot(dat2, aes(x=att, y=read)) + geom_point() + facet_wrap( ~ grade, nrow=1) + theme_bw()
+```
+
+
+## Wide vs. Long format
+
+- When processing and plotting data, how you choose your columns can have a great impact on how easy your data is to manipulate. Data can either be in ‘long’ (or ‘tidy’) form, or it can be in wide form. Some plotting libraries are designed to work with ‘long’ data, and others with wide data.
+
+- A simple difference between the wide-form and the long-form is that the wide-form displays many measurements from one individual in one row and the column names show what the measurements are.
+
+
+### Wide format
+
+- Wide format is the standard structure, and it is sometimes referred to as a *subjects-by-variables* format or *multivariate* format. For longitudinal data, wide format has the characteristics that data collected at different time points appear in multiple columns. In our example data, the reading scores appear in four columns (read.5 to read.8), reflecting the repeated measureds aspect of the reading variable. A static variable, such as attendance (att), occupies only a single column because it is measured at a single occasion. 
+
+```{r}
+head(dat) # wide format
+```
+
+### Long format
+
+- The main feature of long format is that the repeated measures of the subjects appear vertically and are stacked one atop another. Long format is sometimes referred to as univariate format because the response variable occupies a single column. Static variables appear in additional columns with their values repeated for the duration of time because their values do not change over time.
+
+```{r}
+head(dat2) # long format
+```
+
+## Another Example:  `iris` data from base R
+
+The `iris` data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.
+
+
+```{r}
+head(iris)
+```
+
+### Q1: Relationships between species and the four measures.
+
+- Check how sepal length and width and petal length and width are  are related to species.
+
+- What plots can we use?
+
+```{r}
+ggplot(iris, aes(x=Species, y=Sepal.Length)) + geom_boxplot() + theme_classic()
+```
+
+- Gather the four variables: Sepal.Length, Sepal.Width, Petal.Length, Petal.Width. There are three ways to gather the variables. 
+
+```{r}
+# Way1 
+longiris1 <- gather(iris, key = "flower_att", value = "measurement", Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
+# Way 2
+longiris2 <- gather(iris, key = "flower_att", value = "measurement", Sepal.Length:Petal.Width)
+# Way 3
+longiris3 <- gather(iris, key = "flower_att", value = "measurement", -Species)
+
+head(longiris1)
+```
+
+```{r}
+ggplot(longiris1, aes(x=Species, y=measurement)) + geom_boxplot() + facet_grid(~ flower_att) + theme_classic()
+```
+
+### Q2: Relationships between sepal variables and petal variables.
+
+- Check how sepal variables (length and width) are related to pedal variables (length and width). 
+
+- One example: 
+
+```{r}
+ggplot(iris, aes(x=Sepal.Length, y=Petal.Length)) + geom_point() + geom_smooth(method="loess", formula = y ~ x, se =F) + theme_bw()
+```
+
+- We might want to use a scatterplot matrix.
+
+```{r, out.width='90%', fig.height=3.5, fig.align="center", dpi=300}
+library(GGally)
+ggpairs(iris[, c("Sepal.Length", "Sepal.Width", "Petal.Length", "Petal.Width")])
+```
+
+- Gather Sepal variables first and then gather Petal variables.
+
+```{r}
+liris <- gather(iris, key = "Sepal", value = "Sepal.measures", Sepal.Length, Sepal.Width)
+liris2 <- gather(liris, key = "Petal", value = "Petal.measures", Petal.Length, Petal.Width)
+head(liris2, 10)
+
+# you could use the pipe operator to produce the same result
+liris3 <- iris %>% 
+          gather(key = "Sepal", value = "Sepal.measures", Sepal.Length, Sepal.Width) %>% 
+          gather(key = "Petal", value = "Petal.measures",  Petal.Length, Petal.Width)
+
+head(liris3, 10)
+
+# use function `ggplot` with a long-format dataset.
+ggplot(liris2, aes(x=Sepal.measures, y=Petal.measures)) + geom_point() + facet_grid(Petal ~ Sepal) + geom_smooth(method="loess", formula = y ~ x, se =F) + theme_bw()   
+```
+
+## Useful R functions from Wide to Long (or vice versa)
+
+```{r, echo=F}
+my_tbl <- tibble::tribble(
+  ~func, ~package, ~to_long_form, ~to_wide_form,
+ "stack/unstack",      "utils",     "stack", "unstack",
+"reshape", "stats", "reshape(direction='long', ...)", "reshape(direction='wide', ...)",
+"melt/dcast", 	"reshape2",  "melt", "dcast",
+"gather/spread",  "tidyr", "gather", "spread"
+)
+
+kable(my_tbl, row.names = FALSE, align = "l",
+              caption = NULL)
+```
+
+### Example: Long to Wide format
+
+- Let's revisit a subset of MPLS data.
+
+```{r}
+longdat <- gather(dat, key = "grade", value= "read", read.5:read.8) # wide to long format
+head(longdat)
+```
+
+- Transform MPLS data from a long to a wide format
+
+```{r}
+widedat <- spread(longdat, grade, read) # long to wide format
+head(widedat)
+```
+
+- Another example
+
+```{r}
+# create stocks data
+stocks <- data.frame(
+  time = as.Date('2009-01-01') + 0:9,
+  X = rnorm(10, 0, 1),
+  Y = rnorm(10, 0, 2),
+  Z = rnorm(10, 0, 4)
+)
+
+head(stocks)
+
+stocksm <- stocks %>% gather(stock, price, -time) # wide to long format
+head(stocksm)
+
+stocksm %>% spread(stock, price) # long to wide format
+stocksm %>% spread(time, price)  # long to wide format
+```
+
+
+

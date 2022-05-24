@@ -1,0 +1,64 @@
+---
+title: "DS3003: HTML Presentations"
+author: "Youmi Suk"
+date: "2. 16. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Review: Markdown Instructions
+
+- R markdown creates a seamless workflow between data, analysis, and presentation. 
+
+- There are three types of instructions in Markdown.
+
+   + Layout text, e.g., #Headings, ##Subheadings
+
+   + Format text, e.g., *italics*, **bold**, and -bullets
+
+   + Link content, e.g., [Rmarkdown Cheatsheet](https://www.rstudio.com/wp-content/uploads/2015/02/rmarkdown-cheatsheet.pdf), ![UVA logo](https://gray-wvir-prod.cdn.arcpublishing.com/resizer/XsRUIdsfpy5LC0WlWB23O4LjQLg=/1200x675/smart/filters:quality(85)/cloudfront-us-east-1.images.arcpublishing.com/gray/KA44C5NBH5DDLIZKYZYZRDSMV4.png)
+
+## Presentation Templates, Code Chucks, and CSS
+
+- R Markdown templates are available from the menu bar.
+
+- Individual chuck options can be modified with the "cog icon."
+
+- The setup code chuck sets global chuck options.
+
+- Slide styles can be modified using CSS.
+
+Note that CSS is the language we use to style an HTML document. CSS describes how HTML elements should be displayed. For more info about CSS, see [https://www.w3schools.com/css/](https://www.w3schools.com/css/).
+
+
+## Presentation Options
+
+- ioslides - interactive HTML 
+   + best for very stylized HTML presentations.
+   + add `output: ioslides_presentation` in an .Rmd file.
+   
+- Slidy - interactive HTML 
+   + best for fully customizing presentations with CSS.
+   + add `output: slidy_presentation` in an .Rmd file.
+     
+- Beamer - PDF 
+   + best for printing PDFs.
+   + add `output: beamer_presentation` in an .Rmd file.
+   
+- Powerpoint - powerpoint
+   + add `output: powerpoint_presentation` in an .Rmd file.
+   
+## HTML Presentations: Demo
+
+- Use `example1-css.css` and `example2-css.css` as example css files.

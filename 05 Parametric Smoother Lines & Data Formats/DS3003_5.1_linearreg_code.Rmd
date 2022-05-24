@@ -1,0 +1,129 @@
+---
+title: "DS3003: Linear Regression"
+subtitle: "R codes"
+author: "Youmi Suk"
+date: "2. 14. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+# ::::: read income data :::::
+incex <- read.table('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R intro/income_exmpl.dat', header = T, sep = "\t")
+
+# change order of factor levels
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'))
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'))
+incex$sex <- factor(incex$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+```
+
+
+## Rgression Coefficients
+
+$$\text{Slope:} \ \ B=\frac{\sum_1^{n}(X_i-\bar{X})(Y_i-\bar{Y})}{\sum_1^{n}(X_i-\bar{X})^2}=\frac{S_{XY}}{S_X^2}=r_{XY}\frac{S_Y}{S_X}$$
+
+$$\text{Intercept:} \ \ A=\bar{Y}-B\bar{X}$$
+
+### "By hand" 
+
+```{r 5, exercise = TRUE}
+B <- with(incex, sum((age - mean(age)) * (income - mean(income))) / sum((age - mean(age))^2))
+A <- with(incex, mean(income) - B * mean(age))
+c(A = A, B = B)
+
+# alternative ways for computing B (see formulas)
+with(incex, cov(age, income) / var(age))                # using covariance and variance
+with(incex, cor(age, income) * sd(income) / sd(age))    # using correlation and standard deviations
+```
+
+### 'regression function lm()' 
+
+```{r}
+out.lm <- lm(income ~ age, data = incex)
+out.lm            # shows the function call and the regression coefficients
+summary(out.lm)   # prints summary stats of the fitted regression model
+```
+
+## Scatterplot with Linear Reg Lines
+
+* Use `abline()` using either the estimated A and B or the `lm` object. 
+
+```{r}
+plot(income ~ age, data = incex, cex = .6, main = 'income ~ age')
+abline(a = A, b = B, col = 'blue', lwd = 3) # use the estimated A and B.
+```
+
+```{r}
+plot(income ~ age, data = incex, cex = .6, main = 'income ~ age') # plot scatterplot
+abline(out.lm, col = 'blue', lwd = 2)  # use `lm` object    
+```
+
+* Use `geom_smooth()` in package `ggplot2`
+
+```{r}
+ggplot(incex, aes(x=oexp, y=income)) + geom_point(alpha=0.4) + 
+   labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+   geom_smooth(method='lm', formula= y~x, se = FALSE) + theme_bw()     
+```
+
+## Predicted Values
+
+* Compute predicted values.
+
+$$\hat{Y}_i = A + B X_i$$
+
+```{r}
+# ::::: compute predicted values for age = c(20, 40, 65) :::::
+# simple calculation using coefficients
+A + B * c(20, 40, 65)
+
+# using the predict() function in R
+out.lm <- lm(income ~ age, data = incex)
+predict(out.lm, data.frame(age = c(20, 40, 65)))
+```
+
+## Scatterplots with Predicted Values
+
+* Use `points()` to add predicted values.
+
+```{r}
+# ::::: plot data & predicted values :::::
+par(mar = c(4, 4, 1, 1))
+plot(income ~ age, data = incex, cex = .6, xlim = c(0, 65)) # plot scatterplot
+abline(out.lm, col = 'blue', lwd = 2)                       # add regression line
+
+age0 <- c(20, 40, 65)
+pre <- predict(out.lm, data.frame(age = age0))              # predicted values
+points(age0, pre, pch = 16, cex = 1.2, col = 'red')         # add points
+
+# add lines for predicted values
+segments(age0, rep(0, 3), age0, pre, col = 'red', lwd = 2, lty = 2) 
+segments(rep(-10, 3), pre, age0, pre, col = 'red', lwd = 2, lty = 2)
+```
+
+* Use `geom_points()` to add predicted values.
+
+```{r}
+pred.dat <- data.frame(age=age0, pred=pre) # create a new dataset with x and pred. values
+
+ggplot(incex, aes(x=age, y=income)) + geom_point() + 
+   labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+   geom_smooth(method='lm', formula= y~x, se = FALSE) + 
+   geom_point(data = pred.dat, mapping = aes(x=age, y=pred), col="red", size=3) +    
+   theme_bw()    
+```
+
+

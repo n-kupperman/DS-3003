@@ -1,0 +1,251 @@
+---
+title: "DS3003: Kernel Estimation"
+subtitle: "R codes"
+author: "Youmi Suk"
+date: "2. 2. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+# ::::: read income data :::::
+dat <- read.table('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R intro/income_exmpl.dat', header = T, sep = "\t")
+summary(dat)
+
+# change order of factor levels
+dat$occ <- factor(dat$occ, levels = c('low', 'med.', 'high'))
+dat$edu <- factor(dat$edu, levels = c('low', 'med.', 'high'))
+dat$sex <- factor(dat$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+
+set.seed(1)
+# create x and y variables.
+n <- 200   # number of observations
+x <- c(rnorm(n/2, -25, 10), rnorm(n/2, 25, 10))   # generate bimodally distributed variable
+y <- 150 + 1.5*x + .01*x^2 - .001*x^3 + rnorm(n, mean = 0, sd = 10) 
+```
+
+## Scatterplots
+
+* check the data
+
+```{r}
+# check the first 6 lines
+head(dat)
+
+# summary 
+summary(dat)
+```
+
+
+* use default functions to draw a scatterplot.
+
+```{r}
+# scatterplot
+plot(income ~ oexp, data = dat, cex = .6, xlab = 'Occupational Experience', ylab = 'Monthly Net Income')
+```
+
+* use ggplot to draw a scatterplot, regression smoother, and linear regression line.
+
+```{r}
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income') + theme_bw()
+```
+
+## Conditional distribution & expectation
+
+* use default functions.
+
+```{r}
+# conditional distribution
+plot(income ~ factor(oexp), data = dat, cex = .4, xlab = 'Occupational Experience', 
+     ylab = 'Monthly Net Income', main = 'Conditional Distribution')
+
+# conditional expectation
+plot(income ~ oexp, data=dat, cex = .4, xlab = 'Occupational Experience', 
+     ylab = 'Monthly Net Income', main = 'Conditional Mean')
+
+m.vec <- with(dat, tapply(income, oexp, mean))   # creates vector of conditional means
+o.vec <- with(dat, sort(unique(oexp)))           # determines the unique values of oexp and sorts them
+
+points(o.vec, m.vec, col = 'red', pch = 16, type = 'o', lwd = 2) # plot path of means
+```
+
+```{r}
+# compute conditional quartiles
+q50.vec <- with(dat, tapply(income, oexp, median))
+q25.vec <- with(dat, tapply(income, oexp, quantile, prob = .25))  # first quartile
+q75.vec <- with(dat, tapply(income, oexp, quantile, prob = .75))  # third quartile
+
+plot(income ~ oexp, data=dat, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'Conditional Means/Distribution')
+points(o.vec, m.vec, col = 'red', pch = 16, type = 'l', lwd = 2) # plot path of means
+points(o.vec, q50.vec, col = 'blue', pch = 16, type = 'l', lwd = 2)
+points(o.vec, q25.vec, col = 'blue', pch = 16, type = 'l', lwd = 2, lty = 2)
+points(o.vec, q75.vec, col = 'blue', pch = 16, type = 'l', lwd = 2, lty = 2)
+legend('topleft', c('mean', 'median', '1st quartile', '3rd quartile'),
+       col = c('red', rep('blue', 3)), lwd = 2, lty = c(1, 1, 2, 2), inset = .05)
+
+```
+
+* use ggplot.
+
+```{r}
+# conditional distribution
+ggplot(dat, aes(x=oexp, y=income)) + geom_boxplot(aes(group=oexp)) + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Conditional Distribution') + theme_bw()
+
+# conditional expectation
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Conditional mean') + theme_bw() + 
+   stat_summary(fun = mean, geom = 'point', col = "red", size=2.5) + 
+   stat_summary(fun = mean, geom = 'line', col = "red", size=1) 
+```
+
+## Binning
+
+* use default functions 
+
+```{r}
+# create equi-distant bins using cut() (results in a "factor")
+dat$oexpbins <- cut(dat$oexp, breaks = seq(0, 50, by = 5), right = F) 
+m.vec <- with(dat, tapply(income, oexpbins, mean))      # vector of income means for each bin
+o.vec <- with(dat, tapply(oexp, oexpbins, mean))        # vector of oexp means for each bin
+
+# plot scatterplot and path of bin-means
+plot(income ~ oexp, data = dat, cex = .4, xlab = 'Occupational Experience', 
+     ylab = 'Monthly Net Income', main = 'Path of Group Means')
+points(o.vec, m.vec, type = 'o', col = 'red', lwd = 2)  # plot path of means
+abline(v = seq(4.5, 50, by = 5), lty = 2)               # add bin borders
+
+# plot scatterplot and stepfunction of bin-means
+plot(income ~ oexp, data = dat, cex = .4, xlab = 'Occupational Experience', 
+     ylab = 'Monthly Net Income', main = 'Step Function of Group Means')
+points(seq(-.5, 50, by = 5), c(m.vec, m.vec[length(m.vec)]), type = 's', 
+       col = 'red', lwd = 3)                            # type = 's' plots a stepfunction
+```
+
+* use ggplot
+
+```{r}
+# create equi-distant bins using cut() (results in a "factor")
+dat$oexpbins <- cut(dat$oexp, breaks = seq(0, 50, by = 5), right = F) 
+bin.stat <- dat %>% group_by(oexpbins) %>%  
+            summarize (m.income = mean(income), m.oexp = mean(oexp), .groups = "drop") # income means and oexp means for each bin
+
+# plot scatterplot and path of bin-means
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title="Path of Group Means") + theme_bw() + 
+   geom_point(data=bin.stat, aes(x=m.oexp, y=m.income), col = "red", size=2.5) + 
+   geom_line(data=bin.stat, aes(x=m.oexp, y=m.income), col = "red", size=1) + 
+   geom_vline(xintercept = seq(0, 50, by = 5), linetype="dotted", size=0.5)
+
+# plot scatterplot and stepfunction of bin-means
+bin.stat2 <- cbind(rbind(bin.stat, bin.stat[nrow(bin.stat),]), breaks=seq(0, 50, by = 5))
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title="Step Function of Group Means") + theme_bw() + 
+   geom_step(data=bin.stat2, aes(x=breaks, y=m.income), col = "red", size=1)
+```
+
+## Local averaging
+
+* write our own function for local averaging: loc.av()
+
+```{r}
+loc.av <- function(y, x, w)
+{
+   # computes local means of y for each unique value of x 
+   # with a centered/symmetric window of width w
+   # y ... vector of dependent variable
+   # x ... vector of independent variable
+   # w ... width of the window for averaging
+
+   x.val <- sort(unique(x))          # determines the unique values of x and sorts them
+   avrg <- function(y, x, x.loc, w) {
+      # determines the local mean value at a specific value x.loc
+      mean(y[x >= x.loc-w/2 & x <= x.loc+w/2])
+   }
+   m.vec <- sapply(x.val, avrg, y = y, x = x, w = w)  # apply function to each x.val
+   data.frame(x = x.val, y = m.vec)                        # return data frame of x values and means
+}
+```
+
+```{r}
+out.av <- with(dat, loc.av(income, oexp, w = 5))            # matrix of x and mean values
+
+plot(income ~ oexp, data = dat, cex = .4, xlab = 'Occupational Experience', 
+     ylab = 'Monthly Net Income', main = 'Local Averaging')   # plot scatterplot
+lines(out.av, col = 'red', lwd = 3)                           # add path of means obtained from loc.av()
+
+# add path of means resulting from different window choices (10y and 3y)
+out.av2 <- with(dat, loc.av(income, oexp, w = 10))
+lines(out.av2, col = 'blue', lwd = 2)
+out.av3 <- with(dat, loc.av(income, oexp, w = 3))
+lines(out.av3, col = 'green', lwd = 2)
+
+legend('topleft', c('window = 3', 'window = 5', 'window = 10'),
+       col = c('green', 'red', 'blue'), lwd=c(2, 3, 2), inset = .05)
+```
+
+* use ggplot.
+
+```{r}
+out.av <- with(dat, loc.av(income, oexp, w = 5))     # matrix of x and mean values
+
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Local Averaging') + geom_line(data=out.av, aes(x=x, y=y), col = "red", size=1) + theme_bw()
+```
+
+## Kernel estimation
+
+* write our own function for regression smoothing: k.smth()
+
+```{r}
+k.smth <- function(y, x, h)
+{
+   # computes a weighted mean of y for each unique value of x 
+   # with a centered normal kernel
+   # y ... vector of dependent variable
+   # x ... vector of independent variable
+   # h ... bandwidth (standard deviation of the normal kernel)
+
+   x.val <- sort(unique(x))         # sorted unique values of x
+   avrg <- function(y, x, x.loc, h) {
+      # computes local mean value at x.loc using normal kernel weights
+      wt <- dnorm((x - x.loc) / h)  # weigths
+      (y %*% wt) / sum(wt)          # locally weighted mean; or: weighted.mean(y, wt)
+   }
+   m.vec <- sapply(x.val, avrg, y = y, x = x, h = h)   # applies avrg() to all x.vals
+   data.frame(x = x.val, y = m.vec)      # returns matrix of x and mean values
+}
+```
+
+```{r}
+# bandwidth (standard dev. = 1)
+out.smth <- with(dat, k.smth(income, oexp, 1))               # get x and mean values
+plot(income ~ oexp, data = dat, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'Kernel Estimation')  # scatterplot
+lines(out.smth, col = 'red', lwd = 3)                          # add path of means
+
+# add path of means with a larger bandwidth (standard dev. = 3)
+out.smth2 <- with(dat, k.smth(income, oexp, 3))
+lines(out.smth2, col = 'blue', lwd = 2)
+
+legend('topleft', c('SD = 1', 'SD = 3'),
+       col = c('red', 'blue'), lwd=c(3, 2), inset = .05)
+```
+
+* use ggplot.
+
+```{r}
+out.smth <- with(dat, k.smth(income, oexp, 1))               # get x and mean values
+
+ggplot(dat, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Kernel Estimation') + geom_line(data=out.smth, aes(x=x, y=y), col = "red", size=1) + theme_bw()
+```
+

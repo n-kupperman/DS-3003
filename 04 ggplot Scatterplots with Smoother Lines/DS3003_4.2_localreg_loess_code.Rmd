@@ -1,0 +1,186 @@
+---
+title: "DS3003: Local Polynominal Regression & Loess"
+subtitle: "R codes"
+author: "Youmi Suk"
+date: "2. 2. 2022"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+
+library(ggplot2)
+library(dplyr)
+library(knitr)
+
+# ::::: read income data :::::
+incex <- read.table('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R intro/income_exmpl.dat', header = T, sep = "\t")
+
+# change order of factor levels
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'))
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'))
+incex$sex <- factor(incex$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+```
+
+## Local polynomial regression
+
+- Write our own local linear or quadratic regression function: `k.reg()`
+```{r}
+k.reg <- function(y, x, h, deg = 1)
+{
+   # computes a predicted value of y for each unique value of x 
+   # with a centered normal kernel
+   # y   ... vector of dependent variable
+   # x   ... vector of independent variable
+   # h   ... bandwidth (standard deviation of the normal kernel
+   # deg ... degree of polynomial (1: linear, 2: quadratic)
+
+   x.val <- sort(unique(x))
+   avrg <- function(y, x, x.loc, h, deg) {
+      x.c <- x - x.loc        # centering
+      wt <- dnorm((x.c) / h)  # weights
+      if(deg == 1) m <- lm(y ~ x.c, weights = wt)$coef[1] # extracts intercept
+      if(deg == 2) m <- lm(y ~ x.c + I(x.c^2), weights = wt)$coef[1]
+      m                       # return mean value
+   }
+   m.vec <- sapply(x.val, avrg, y = y, x = x, h = h, deg = deg) 
+   data.frame(x = x.val, y = m.vec)
+}
+```
+
+- add a local reg. line onto a scatterplot.
+
+```{r}
+# bandwidth = 1
+out.kreg <- with(incex, k.reg(income, oexp, 1))            # get x and local mean values
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'Local Polynomial Regression')
+lines(out.kreg, col = 'red', lwd = 3)                      # add path of means
+```
+
+- add multiple reg. lines onto a scatterplot.
+
+```{r}
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'Local Polynomial Regression')
+lines(out.kreg, col = 'red', lwd = 3)                      # add path of means
+
+# add paths of means with different bandwidth or degree of polynomials
+out.kreg2 <- with(incex, k.reg(income, oexp, 3))           # bandwidth of 3
+lines(out.kreg2, col = 'blue', lwd = 3)
+out.kreg3 <- with(incex, k.reg(income, oexp, 3, deg = 2))  # quadratic polynomial
+lines(out.kreg3, col = 'green', lwd = 3)
+
+legend('topleft', c('Band = 1', 'Band = 3', 'Band = 3 + Quad'),
+       col = c('red', 'blue', 'green'), lwd=rep(3, 3), inset = .05)
+```
+
+- If you like to use package `ggplot2`,
+
+```{r}
+colors <- c("Band = 1 & Linear" = "red", "Band = 3 & Linear" = "blue", "Band = 3 & Qaud" = "green")
+
+
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + 
+  labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Local Polynomial Regression', color = "Bandwidth & Degree") +    
+  geom_line(data=out.kreg, aes(x=x, y=y, col="Band = 1 & Linear"), size=1) + 
+  geom_line(data=out.kreg2, aes(x=x, y=y, col="Band = 3 & Linear"), size=1) + 
+  geom_line(data=out.kreg3, aes(x=x, y=y, col="Band = 3 & Qaud"), size=1) +
+  scale_color_manual(values = colors) + theme_bw()
+```
+
+
+## `loess()` function
+
+- uses a span instead of a fixed bandwidth, i.e., the bandwidth at each 
+- distinct x-value depends on the number of observations in the neighborhood (bandwidth is computed such that 20% of data are covered)
+
+### - Local regression with varying degrees
+
+```{r}
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'loess (LOcal regrESSion)')         # scatterplot
+
+x.val <- seq(0, 48, by = .5)
+
+# ::::: local regression (loess): but with simple means since degree = 0, ie kernel estimation :::::
+out.lss <- loess(income ~ oexp, data = incex, span = .2, degree = 0)         # estimate model
+y.pred <- predict(out.lss, data.frame(oexp = x.val))  # get predicted values
+lines(x.val, y.pred, col = 'red', lwd = 2)
+
+# ::::: local LINEAR regression (loess): degree = 1 :::::
+out.lss1 <- loess(income ~ oexp, data = incex, span = .2, degree = 1)
+y.pred <- predict(out.lss1, data.frame(oexp = x.val))
+lines(x.val, y.pred, col = 'blue', lwd = 2)
+
+# ::::: local QUADRATIC regression (loess): degree = 2 :::::
+out.lss2 <- loess(income ~ oexp, data = incex, span = .2, degree = 2)
+y.pred <- predict(out.lss2, data.frame(oexp = x.val))
+lines(x.val, y.pred, col = 'green', lwd = 2)
+
+legend('topleft', c('Span = .2 & Deg. = 0', 'Span = .2 & Deg. = 1', 'Span = .2 & Deg. = 2'),
+       col = c('red', 'blue', 'green'), lwd=rep(2, 3), inset = .05)
+```
+
+
+
+### - Separate nonparametric regressions (for male and female employees)
+
+```{r}
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', bty = 'L')                  # scatterplot
+out.all <- loess(income ~ oexp, incex, span = .5, degree = 2) # estimate model for all employees
+out.m <- loess(income ~ oexp, incex, subset = sex == 'male', 
+         span = .5, degree = 2)                               # estimate model for men
+out.f <- loess(income ~ oexp, incex, subset = sex == 'female', 
+         span = .5, degree = 2)                               # estimate model for women
+x.val <- seq(0, 48, by = .5)                                  # get x values where to estimate means
+lines(x.val, predict(out.all, x.val), lwd = 3, lty = 2)       # predict & plot mean values for all
+lines(x.val, predict(out.m, x.val), col = 'blue', lwd = 2)    # predict & mean values for men
+lines(x.val, predict(out.f, x.val), col = 'red', lwd = 2)     # predict & mean values for women
+```
+
+## function `geom_smooth()` in `ggplot2`
+
+- default span = 0.75 
+
+```{r}
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, col="red", se = FALSE) + theme_bw()
+```
+
+- try different spans.
+
+```{r}
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, span=0.75, col="red", se = FALSE) +
+        geom_smooth(method='loess', formula= y~x, span=0.4, col="blue", se = FALSE) + 
+        geom_smooth(method='loess', formula= y~x, span=0.2, col="green", se = FALSE) + theme_bw()
+```
+
+- with a color separator
+
+```{r}
+ggplot(incex, aes(x=oexp, y=income, col=sex)) + geom_point(alpha=0.4) + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, se = FALSE) + theme_bw()
+```
+
+
+## Comparison with linear regression 
+
+```{r}
+# ::::: comparison with linear regression :::::
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', bty = 'L')             # scatterplot
+lines(x.val, y.pred, col = 'blue', lwd = 2)              # add loess() estimates
+abline(lm(income ~ oexp, incex), lwd = 3, col = 'red')   # add linear regression line
+```
+

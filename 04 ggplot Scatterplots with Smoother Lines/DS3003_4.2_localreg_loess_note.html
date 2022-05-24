@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Introduction to Nonparamteric Regression: Local Polynominal Regression &amp; Loess</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Youmi Suk" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/remark-css/default-fonts.css" rel="stylesheet" />
+    <script src="libs/fabric/fabric.min.js"></script>
+    <link href="libs/xaringanExtra-scribble/scribble.css" rel="stylesheet" />
+    <script src="libs/xaringanExtra-scribble/scribble.js"></script>
+    <script>document.addEventListener('DOMContentLoaded', function() { window.xeScribble = new Scribble({"pen_color":["#FF0000"],"pen_size":3,"eraser_size":30,"palette":[]}) })</script>
+    <link href="libs/xaringanExtra-extra-styles/xaringanExtra-extra-styles.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Introduction to Nonparamteric Regression: Local Polynominal Regression &amp; Loess
+### Youmi Suk
+### School of Data Science, University of Virginia
+### 2. 2. 2022
+
+---
+
+
+
+
+
+
+
+# Overview
+
+### Local Polynomial Regression 
+
+### Locally Weighted Regression (LOESS/LOWESS)
+
+### Nonparametric vs. Parametric Regression
+
+---
+
+
+# Regression/Scatterplot Smoothers
+
+- Binning is a very rough method and depends, of course, on the location and size of the bins.
+
+- An alternative approach are so called &lt;span style="color: red;"&gt;regression or scatterplot smoothers&lt;/span&gt; which construct a separate bin (=window) for each unique x-value and then calculates the mean (or other statistic) from the data within the window. The window is typically defined by kernel weights.
+
+ - Local averaging &amp; kernel estimation
+
+ - &lt;span style="color: blue;"&gt;Local polynomial regression&lt;/span&gt;
+
+ - &lt;span style="color: blue;"&gt;Locally weighted regression (loess/lowess)&lt;/span&gt;
+
+
+---
+
+
+# Boundary Bias with Kernal Estimation
+
+.center[&lt;img src="figure/localave_bb.png" style="width: 95%" /&gt;]
+
+---
+
+
+# Local Polynomial Regression
+
+- Poor performance of local averaging and kernel estimation particularly at the boundaries of `\(X\)`
+
+- Why not running a simple linear or quadratic regression inside each window?
+
+- Reflects nonlinear relationships within windows.
+
+- Helps in "extrapolating" to boundaries
+
+   + E.g., &lt;span style="color: red;"&gt;local quadratic regression&lt;/span&gt;: run a quadratic regression with (kernel) weights 
+
+`$$\hat{Y}_i = A + B_1(x_i-x_0) + B_2 (x_i-x_0)^2$$`
+
+`\(~~~~~~~~~~~\)` where the estimated mean value at `\(x_0\)` is given by the estimated
+
+`\(~~~~~~~~~~~\)` intercept `\(A\)`: `\(\hat{Y} | x_0 = A\)`.
+
+---
+
+# Local Linear Regression 
+
+- with a normal kernal
+
+.center[&lt;img src="figure/loclinear.png" style="width: 95%" /&gt;]
+
+---
+
+# Local Quadratic Regression 
+
+- with an Epanechnikov kernal
+
+.center[&lt;img src="figure/locq.png" style="width: 95%" /&gt;]
+
+---
+
+# Local Quadratic Regression 
+
+- with a small span
+
+.center[&lt;img src="figure/locq_s.png" style="width: 95%" /&gt;]
+
+---
+
+# Local Quadratic regression 
+
+- with a large span
+
+.center[&lt;img src="figure/locq_l.png" style="width: 95%" /&gt;]
+
+---
+
+# How to do it in R?
+
+- Write our own local linear or quadratic regression function: `k.reg()`
+
+
+```r
+k.reg &lt;- function(y, x, h, deg = 1)
+{
+   # computes a predicted value of y for each unique value of x 
+   # with a centered normal kernel
+   # y   ... vector of dependent variable
+   # x   ... vector of independent variable
+   # h   ... bandwidth (standard deviation of the normal kernel
+   # deg ... degree of polynomial (1: linear, 2: quadratic)
+
+   x.val &lt;- sort(unique(x))
+   avrg &lt;- function(y, x, x.loc, h, deg) {
+      x.c &lt;- x - x.loc        # centering
+      wt &lt;- dnorm((x.c) / h)  # weights
+      if(deg == 1) m &lt;- lm(y ~ x.c, weights = wt)$coef[1] # extracts intercept
+      if(deg == 2) m &lt;- lm(y ~ x.c + I(x.c^2), weights = wt)$coef[1]
+      m                       # return mean value
+   }
+   m.vec &lt;- sapply(x.val, avrg, y = y, x = x, h = h, deg = deg) 
+   cbind(x = x.val, y = m.vec)
+}
+```
+
+---
+
+# Example: Local polynomial regression
+
+- with function `plot`
+
+
+```r
+out.kreg &lt;- with(incex, k.reg(income, oexp, 1))            # get x and local mean values
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'Local Polynomial Regression')
+lines(out.kreg, col = 'red', lwd = 3)                      # add path of means
+```
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-2-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example: Local polynomial regression
+
+- with function `ggplot`
+
+
+```r
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + 
+  labs(x = 'Occupational Experience', y = 'Monthly Net Income', title='Local Polynomial Regression') +    
+  geom_line(data=out.kreg, aes(x=x, y=y), col = "red", size=1) + theme_bw()
+```
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-3-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example: Local polynomial regression
+
+- varying bandwidth and degrees with function `plot`
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-4-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Example: Local polynomial regression
+
+- varying bandwidth and degrees with function `ggplot`
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-5-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Local/Locally Weighted Regression (LOESS/LOWESS)
+
+LOESS/LOWESS is an improved version of local polynomial regression (with a normal kernel) which is less sensitive to outliers
+
+```
+loess(formula, data, weights, subset, na.action, span = 0.75, 
+  degree = 2, ...)
+
+span ... span of window; default is 75% of observ.
+degree ... degree of polynomial; default is 
+	     a quadratic polynomial (= 2) 
+```
+
+---
+
+# How to do it in R?
+
+- with varying degrees
+
+
+```r
+plot(income ~ oexp, data = incex, cex = .4, xlab = 'Occup. Experience', 
+     ylab = 'Monthly Net Income', main = 'loess (LOcal regrESSion)')         # scatterplot
+
+x.val &lt;- seq(0, 48, by = .5)
+
+# ::::: local regression (loess): but with simple means since degree = 0, ie kernel estimation :::::
+out.lss &lt;- loess(income ~ oexp, data = incex, span = .2, degree = 0)         # estimate model
+y.pred &lt;- predict(out.lss, data.frame(oexp = x.val))  # get predicted values
+lines(x.val, y.pred, col = 'red', lwd = 2)
+
+# ::::: local LINEAR regression (loess): degree = 1 :::::
+out.lss1 &lt;- loess(income ~ oexp, data = incex, span = .2, degree = 1)
+y.pred &lt;- predict(out.lss1, data.frame(oexp = x.val))
+lines(x.val, y.pred, col = 'blue', lwd = 2)
+
+# ::::: local QUADRATIC regression (loess): degree = 2 :::::
+out.lss2 &lt;- loess(income ~ oexp, data = incex, span = .2, degree = 2)
+y.pred &lt;- predict(out.lss2, data.frame(oexp = x.val))
+lines(x.val, y.pred, col = 'green', lwd = 2)
+
+legend('topleft', c('Span = .2 &amp; Deg. = 0', 'Span = .2 &amp; Deg. = 1', 'Span = .2 &amp; Deg. = 2'),
+       col = c('red', 'blue', 'green'), lwd=rep(2, 3), inset = .05)
+```
+
+---
+
+# How to do it in R?
+
+- with varying degrees
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-7-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# How to do it in R?
+
+- with varying spans
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# How to do it in R?
+
+- separate loess lines
+
+
+```r
+# loess() for overall sample, men, and women
+plot(income ~ oexp, data = incex, bty = 'L')
+out.all &lt;- loess(income ~ oexp, incex, span = .5, degree = 2)
+out.m &lt;- loess(income ~ oexp, incex, 
+  subset = sex == 'male', span = .5, degree = 2)
+out.f &lt;- loess(income ~ oexp, incex, 
+  subset = sex == 'female', span = .5, degree = 2)
+x.val &lt;- seq(0, 48, by = .5)
+
+lines(x.val, predict(out.all, x.val), lwd = 3, lty = 2)
+lines(x.val, predict(out.m, x.val), col = 'blue', lwd = 2)
+lines(x.val, predict(out.f, x.val), col = 'red', lwd = 2)
+```
+
+---
+
+# How to do it in R?
+
+- separate loess lines
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-10-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# function geom_smooth in ggplot2
+
+- default span = 0.75 
+
+
+```r
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, col="red", se = FALSE) + theme_bw()
+```
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-11-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# function geom_smooth in ggplot2
+
+- try different spans
+
+
+```r
+ggplot(incex, aes(x=oexp, y=income)) + geom_point() + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, span=0.75, col="red", se = FALSE) +
+        geom_smooth(method='loess', formula= y~x, span=0.4, col="blue", se = FALSE) + 
+        geom_smooth(method='loess', formula= y~x, span=0.2, col="green", se = FALSE) + theme_bw()
+```
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-12-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# function geom_smooth in ggplot2
+
+- with a color separator
+
+
+```r
+ggplot(incex, aes(x=oexp, y=income, col=sex)) + geom_point(alpha=0.4) + labs(x = 'Occupational Experience', y = 'Monthly Net Income') +
+        geom_smooth(method='loess', formula= y~x, se = FALSE) + theme_bw()
+```
+
+&lt;img src="DS3003_localreg_loess_note_files/figure-html/unnamed-chunk-13-1.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+
+---
+
+# Comparison of Regression Smoothers
+
+- with empirical data
+
+
+.center[&lt;img src="figure/regcom_e.png" style="width: 95%" /&gt;]
+
+
+---
+
+# Comparison of Regression Smoothers
+
+- with simulated data
+
+.center[&lt;img src="figure/regcom_s.png" style="width: 95%" /&gt;]
+
+
+---
+
+# Regression Smoothers: Summary
+
+- Local averaging and kernel estimation perform rather poorly at the boundaries (&lt;span style="color: red;"&gt;boundary bias&lt;/span&gt;) and whenever the functional form is highly nonlinear (within windows). 
+
+- Performance of local polynomial regression and LOESS is very similar
+In any case, degree of smoothing depends on the window widths (as defined by the bandwidth or span)
+
+- In practice, you can either use the `loess()` function or the local polynomial regression function `locpol()` from the locpol package.
+
+---
+
+# Regression Smoothers: Summary
+
+- Nonparametric regression works well for a single explanatory variable; though it is easy to &lt;span style="color: red;"&gt;generalize nonpar. regression&lt;/span&gt; to more than one explanatory variable, it is hard to do so in practice (would need huge sample sizes &amp; is computationally expensive)
+
+- However, the relationship between an outcome ( `\(Y\)` ) and explanatory variable ( `\(X\)` ) can frequently be described by a &lt;span style="color: red;"&gt;parametric model&lt;/span&gt;.
+
+- For instance, if the &lt;span style="color: red;"&gt;linearity assumption&lt;/span&gt; is reasonable we can use a linear model for describing the relation between `\(Y\)` and `\(X\)`.
+
+---
+
+# Nonparametric vs. Parametric Regression
+
+- Nonparametric vs. linear path of means: linearity assumption seems plausible.
+
+
+.center[&lt;img src="figure/linearloess.png" style="width: 95%" /&gt;]
+
+
+---
+
+# Nonparametric vs. Parametric Regression
+
+- By using a parametric model we typically &lt;span style="color: red;"&gt;lose some local information&lt;/span&gt;.
+
+- Instead of using the mean value for each specific x-value (around 50 means; one for each year of occupational experience) we now reduce the path of means to only &lt;span style="color: red;"&gt;two parameters&lt;/span&gt;: the intercept `\(A\)` and slope `\(B\)`.
+
+- However, if the &lt;span style="color: red;"&gt;linearity assumption&lt;/span&gt; is wrong the linear (parametric) path of means is misleading!
+
+---
+
+# Linear Regression
+
+A simple linear model is wrong, and it needs a polynomial (cubic) model—both belong to the class of linear regression models.
+
+.center[&lt;img src="figure/linearfamily.png" style="width: 95%" /&gt;]
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

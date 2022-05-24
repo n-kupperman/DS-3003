@@ -1,0 +1,102 @@
+---
+title: "Assignment 13 - Shiny and Maps (4 pts)"
+author: "Group #, NAME"
+date: "Due Date: 11:59pm, Apr 4"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_float: yes
+    code_folding: show
+# runtime: shiny    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+library(tidyverse)
+library(shiny)
+library(shinythemes)
+```
+
+# Group Homework 
+
+- You will work with your group to complete this assignment.
+
+- Upload your Shiny app on [ShinyApps.io](https://www.shinyapps.io).
+
+- Submit your group's shared `.Rmd` AND your URL (https://XXXXX.shinyapps.io/XXXXX) on Collab.
+
+- Confirm this with the following comment included in your submission text box: **"Honor Pledge: I have recreated my group submission using using the tools I have installed on my own computer"**
+    
+- Name the files with a group name and YOUR name for your submission.
+
+- One of the group members will **present R codes and plots for Parts 1 and 2** in class on **Apr. 4 (Mon)**. Please e-mail the instructor if you're a presenter by 11:59pm, Apr. 3. Also, if you're a presenter, please bring your laptop so that you can share your screen on zoom for the presentation.
+
+# Part 1
+
+- Get the latest data from from [https://covid19.who.int/info?openIndex=2](https://covid19.who.int/info?openIndex=2).
+      
+   - The file should likely be named "WHO-COVID-19-global-table-data.csv"
+      
+   - Don't use the data for the previous group assignments. It is not the most recent data. 
+
+- Choose three WHO regions of interest. Note that we have 6 main regions: Africa, Americas, Eastern Mediterranean, Europe, South-East Asia, and Western Pacific.
+
+- Create a subset including 3 countries per `WHO region`. You can choose any three countries within each `WHO region` to compare the mortality rate (`mutate(rate = "Deaths - cumulative total"/"Cases - cumulative total")`). You will have 9 countries (3 countries * 3 WHO regions).
+
+- Using `navbarPage()`, create a shiny dashboard that contains 3 tabs where each tab has a barplot of mortality rates with error bars from three countries in the selected region. For example,
+
+```
+ui <- navbarPage(title = "Mortality Rate", 
+      tabPanel("Africa", ...), 
+      tabPanel("Americas", "...), 
+      tabPanel("Eastern Mediterranean", ...))
+```      
+- Create separate `tabPanel()` for each level of`WHO region` variable.
+
+- Under each tab, create a bar plot (with error bars) from three countries in the selected region with a controller for including/excluding errors bars. The default plot has no error bars.
+
+- Use different control types under each tab. Check available control types from [Widget gallery](https://shiny.rstudio.com/gallery/widget-gallery.html).
+  
+- Change a theme from the `shinythemes` package. See options from https://rstudio.github.io/shinythemes/.   
+
+- Tips for  `renderPlot()`:
+
+```
+    output$<id> = renderPlot({
+     
+     p1 <-  ...your ggplot...
+     print(p1)
+      
+     if (input$<id>) { # modify this line
+     p1_e <- p1 + geom_errorbar(aes(ymin=rate-1.96*SE, ymax=rate+1.96*SE), width=.2)  # add error bars
+     print(p1_e)
+     }}) 
+```
+
+- Example: https://youmi.shinyapps.io/A13part1/
+
+```{r}
+# add your codes 
+```
+
+# Part 2
+
+- Create a choropleth US map like the Trump Impeachment example. You need to add any state-related variable (e.g., the number of universities per state, the crime rate per state) onto the US map.
+
+- Use a dataset that is available in data repositories (e.g., [kaggle](https://www.kaggle.com/datasets)). But don't use the built-in datasets or datasets from packages. You need to find a state-related variable online. 
+
+- Briefly describe the dataset you're using for this assignment (e.g., means to access data, context, sample, variables, etc...)
+  
+   + *describe your data.*
+   
+- Create a choropleth map that displays data on a map by shading states with different colors.
+
+- You can use any map-related functions we've learned in class or any other available functions for creating maps. Your map can be a static map or an interactive map.
+
+```{r}
+# add your codes 
+```
+
+- Describe your choropleth map.
+
