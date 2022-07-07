@@ -84,3 +84,24 @@ This course provides practical experiences about how data is commonly used in co
 |  Week 14 | Finals| 	|	| 	|
 | Week 15 | Finals |  	|	|  	|
 | Week 16 | Finals	| 	| 	| 	|  	
+
+## Class Policies
+
+Grading Policies: Courses carrying a Data Science subject area use the following grading system: A, A-; B+, B, B-; C+, C, C-; D+, D, D-; F.  The symbol W is used when a student officially drops a course before its completion or if the student withdraws from an academic program of the University.
+
+Grading Scale: 
+
+ - 93-100 A
+ - 90-92 A- 
+ - 87-89 B+
+ - 83-86 B 
+ - 80-82 B- 
+ - 77-79 C+ 
+ - 73-76 C 
+ - 70-72 C- 
+ - <70 F
+
+University of Virginia Honor System: All work should be pledged in the spirit of the Honor System at the University of Virginia. The instructor will indicate which assignments and activities are to be done individually and which permit collaboration. The following pledge should be written out at the end of all quizzes, examinations, individual assignments, and papers:  “I pledge that I have neither given nor received help on this examination (quiz, assignment, etc.)”.  The pledge must be signed by the student. For more information, visit www.virginia.edu/honor.
+
+
+Special Needs:  The University of Virginia accommodates students with disabilities. Any SCPS student with a disability who needs accommodation (e.g., in arrangements for seating, extended time for examinations, or note-taking, etc.), should contact the Student Disability Access Center (SDAC) and provide them with appropriate medical or psychological documentation of his/her condition. Once accommodations are approved, just follow up with me concerning any logistics and implementation of accommodations.  Please try to make accommodations for test-taking at least 14 business days in advance of the date of the test(s). Students with disabilities are encouraged to contact the SDAC: 434-243-5180/Voice, 434-465-6579/Video Phone, 434-243-5188/Fax. Further policies and statements are available at www.virginia.edu/studenthealth/sdac/sdac.html
