@@ -66,24 +66,36 @@ This course provides practical experiences about how data is commonly used in co
 [Shiny](https://shiny.rstudio.com)
 
 ## Schedule of Topics
-| Week 	| Theme 	| Topics 	| Lab 	| Reading/Repo (Prior to Class) 	|
-|:---:	|:---:	|:---:	|:---:	|:---:	|
-| Week 1 	| Intro to Course & R 	| 	| 	|    	|
-| Week 2 	|  Intro to R (cont'd) 	|  	| 	|       | 
-| Week 3 	| Visualizations with Base R; ggplot2	|  	|  	|  	|
-| Week 4 	| ggplot2	|  | |	|
-| Week 5 | Non-Parametric & Parametric Smoother Lines; data format| 	||| 
-| Week 6	| Midterms| || |
-| Week 7 | Midterms	| | | |
-| Week 8| Plotly, Interactive Presentations & Plots with Statistical Uncertainty| | | 
-| Week 9 | 	|  | 	| |
-| Week 10 |Shiny	| 	| 	| 	|
-| Week 11 | Static Maps & Interactive Maps (+ Shiny) 	|  	|	| 	|
-| Week 12 | Heatmap & Animations (+ Shiny)|	| |   |
-| Week 13 |Finals	| 	| 	| |
-|  Week 14 | Finals| 	|	| 	|
-| Week 15 | Finals |  	|	|  	|
-| Week 16 | Finals	| 	| 	| 	|  	
+| Week 	  | Class # | Date        | Topic 	        | Repo	| Reading (Prior to Class) 	|
+|:---:	  |:---:	   |:---:	     |:---:	            |:---:	| :---:                     |
+| Week 1  | 1       | 8/23        | Intro to Course 	| 	 	| |
+| Week 1  | 2       | 8/25        | Intro to R       |||
+| Week 2  | 3       | 8/30        | Intro to R    	|  	| 	|       
+| Week 2  | 4       | 9/1         | Intro to R: Lab  | ||
+| Week 3  | 5       | 9/6        |Visualizations with Base R; ggplot2	|  	|  	|  	
+| Week 3  | 6       | 9/8 ||||
+| Week 4  | 7      |9/13   | ggplot2	|  | |	
+| Week 4  | 8      |9/15 ||||
+| Week 5  | 9      |9/20   | Non-Parametric & Parametric Smoother Lines; data format| 	||
+| Week 5  | 10      | 9/22||||
+| Week 6  |  11     |9/27  | Midterms    | || 
+| Week 6  | 12     | 9/29 ||||
+| Week 7  | 13     |10/4 (no class)  |	Fall Reading Days | | | 
+| Week 7. | 14      | 10/6 ||||
+| Week 8  | 15 10/11  | Plotly, Interactive Presentations & Plots with Statistical Uncertainty| | | 
+| Week 8  | 16 | 10/13 | | | |
+| Week 9  | 17     |10/18 |	|  | 	| |
+| Week 9. | 18     | 10/20 |||
+| Week 10 | 19     |10/25 | Shiny	| 	| 	| 	|
+| Week 10 | 20    |10/27
+| Week 11 | 11/1 & 11/3.  | Static Maps & Interactive Maps (+ Shiny) 	|  	|	| 	|
+| Week 12 | 11/8 (?no class) & 11/10 | Heatmap & Animations (+ Shiny)|	| |   |
+| Week 13 | 11/15 & 11/17 | | 	| 	| |
+| Week 14 | 11/22 & 11/24 (no class) || 	|	| 	|
+| Week 15 | 11/29 & 12/1 | |  	|	|  	|
+| Week 16 | 12/6	| 	| 	| 	| 
+| Final for Section 17703 | Sat 12/10 2-5p | | | |
+| Final for Section 19026 | Th 12/8 9a-12p | | | | 
 
 ## Class Policies
 
