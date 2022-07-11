@@ -127,7 +127,7 @@ This course will be a combination of lectures and labs. As the course progresses
 | Week 10       | 10/30 @ 11:59pm   | Maps                    |                 |
 | Week 11       | 11/6  @ 11:59pm   | Heatmaps                |                 |
 | Week 12       | 11/13 @ 11:59pm   | Reflection Write-up     |                 |
-| Week 13       | 11/20 @ 11:59pm.  | Shiny II                |                 |  
+| Week 13       | 11/20 @ 11:59pm.  | Shiny                   |                 |  
 | Week 14       | NA                | Thanksgiving            |                 |
 | Week 15       | NA                | Final Presentation Prep |                 |
 | Week 16       | NA                | Finals                  |                 |
