@@ -1,14 +1,14 @@
 ---
-title: "Assignment 2 - Getting Started with R (4 pts)"
-author: "TYPE YOUR NAME HERE (UVA computing ID)"
-date: "Due Date: 11:59pm, Jan 26"
+title: "Assignment 1 - Getting Started with R (4 pts)"
+author: "FIRST NAME LAST NAME (UVA computing ID)"
+
 output:
   html_document:
     number_sections: yes
     toc: yes
     toc_float: yes
     code_folding: show
-  pdf_document:
+    pdf_document:
     toc: yes
 ---
 
