@@ -1,0 +1,784 @@
+---
+title: "DS3003 Introduction to R"
+author: "Youmi Suk"
+date: "8/24/2021"
+output:
+     html_document:
+          toc: TRUE
+          toc_depth: 4
+          toc_float: true
+          toc_collapsed: true
+          theme: journal
+          code_folding: show
+---
+
+<!--- Change font size for headers --->
+<style>
+h1.title {
+  font-size: 30px;
+}
+h1 {
+  font-size: 26px;
+}
+h2 {
+  font-size: 22px;
+}
+h3 { 
+  font-size: 18px;
+}
+
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, comment=NA)
+knitr::opts_knit$set(global.par=TRUE, html.table.attributes = '')
+```
+
+```{r, include=FALSE}
+par(mar=c(2.1,2.1,.5,1.5), mgp=c(1.3,.3,0), tck=-0.01)
+```
+
+
+## 1. R as a Simple Calculator
+
+### Simple calculation
+
+```{r}
+1 + 1 #(for mac, command + enter)
+sqrt(36) / 3 + 2 * .5  # 2 + 1
+sqrt(36)/3+2*.5
+sqrt(36) / (3 + 2 * .5) # some calculations. 
+
+?sqrt
+```
+
+###  Assigning values to an R object 
+
+```{r cal2}
+x <- sqrt(36) / 3 + 2 * .5   # you can also use "=" instead of "<-"
+x                            # print content of R object "x" on the screen
+```
+
+### Simple computations with "x" 
+```{r}
+7*x
+y <- 7*x
+
+y
+
+y/x
+```
+
+**Important shortcuts and advice**
+
+- use Ctrl+R (Windows) or Command+Enter (Mac) to run a selection or a single line 
+- everything after a pound sign (#) is a commentary 
+- (i.e., R does not try to interpret numbers and character strings that follow a pound sign)
+
+- always try to carefully comment your R-script/R-markdown files
+- develop a clear style in writing R-script/R-markdown files
+- guidelines for a clear style can be found at https://google.github.io/styleguide/Rguide.xml
+
+- basic terminology for functions:     
+
+```
+        function(arg1, arg2, arg3, ...)    e.g.       sqrt(x = 36)
+         |          |   |    |                         |   |   |
+  function name     arguments            function name / argument name / argument value
+                                            "sqrt"            "x"            "36"
+
+```
+### Help
+
+```{r}
+?sqrt # see help for sqrt()
+```
+
+## 2. Set Working Directory
+
+- You need specify the corresponding path on your computer
+
+```{r wd}
+setwd('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R intro')  # working directory on my laptop
+```
+
+
+## 3. Reading Data
+
+### Read tabulator separated data
+
+```{r read}
+incex <- read.table('income_exmpl.dat', header = T, sep = "\t")
+
+head(incex)         # print the first 6 lines on the screen
+
+# if the data are not located in the working directory (see setwd()) then you 
+# can read the data by specifying the full path
+
+incex <- read.table('/Users/youmisuk/Desktop/DS3003/W1 - Syllabus & R introincome_exmpl.dat', 
+                    header = T, sep = "\t")
+
+# if an R function requires a character string or name as an argument (e.g., the file name 
+# or path), it must be set in quotes ("name" or 'name')
+```
+
+### Read comma separated data
+```{r}
+?read.csv                   # help on reading CSV data
+incex.2 <- read.csv('income_exmpl.csv')
+```
+
+### Read other data formats (e.g., SPSS, SAS, or STATA)
+ - use the 'foreign'-package 
+ - install package from server, for example, in Berkeley 
+ - alternatively use menu bar, `Tools`
+ 
+```{r}
+#install.packages('foreign', repos = 'http://cran.cnr.Berkeley.edu/')   
+library(foreign)            # load package (makes its functions available)
+#library(help = 'foreign')   # help on the package
+
+#?read.spss                  # help on reading SPSS data files (.sav)
+incex.3 <- read.spss('income_exmpl.sav', to.data.frame = TRUE)
+
+```
+
+**Advice**
+
+- If you want to understand an R function you need to carefully read the help file.
+- This saves you from getting cryptic error messages and becoming increasingly frustrated.
+- In particular, look at the default setting of the arguments, e.g. for to.data.frame
+
+## 4. Generic Functions
+
+### Simple description of data structure
+```{r}
+# incex              # prints the data on the screen = print(incex)
+head(incex, 10)          # returns the first six lines of the data frame
+tail(incex)          # returns the last six lines of the data frame
+incex[1:10, ]        # returns the first ten lines by subscripting: incex[rows, cols]
+str(incex)           # shows the structure of the data frame
+
+dim(incex)           # dimension of data (rows and colums)
+nrow(incex)          # number of rows
+ncol(incex)          # number of columns
+names(incex)         # variable names of the data frame
+dimnames(incex)      # list of row & variable names of the data frame
+
+class(incex)         # type (class) of R-object: data.frame
+# incex$age          # extracts & prints the "age" variable from the data frame
+head(incex$age)      # returns the first six lines of age variable
+class(incex$age)     # class of age variable: integer vector
+length(incex$edu)    # length of the factor (number of observations)
+
+# incex$edu          # extrats & print the factor values on the screen
+head(incex$edu)      # returns the first six lines of edu variable
+class(incex$edu)     # class of edu variable: factor (vector of categorical values)
+nlevels(incex$edu)   # number of factor levels
+levels(incex$edu)    # levels of the factor
+
+```
+
+### Checking available objects & search path
+```{r}
+objects()            # lists the objects accessible to you; alternatively: ls()
+search()             # lists attached packages, and R objects,
+
+rm(incex.2, incex.3) # removes the two data sets
+objects()
+```
+
+### Getting help
+
+```
+help(mean)           # get help on R-objects (mostly functions)
+?mean                # alternative version
+
+help.search('mean')  # if you don't know the name of the function (object)
+??mean               # alternative version
+
+apropos('mean')      # searches for objects (incl. functions) containing "mean" 
+                     # in their name
+
+????mean             # if you still cannot find what you want
+
+help.start()         # help "menu"
+```
+
+### Creating a Vector of Sequences
+
+```{r}
+                     # creates a vector of numeric values
+                     # combines (concatenates) single values to a vector
+c(1, 2, 3)           # very frequently used (whenever you have to pass a vector to a function)!
+          
+c('apple', 'tree')   # combines character strings into a character vector
+c(3, 'apple')        # transforms 3 into a character string ("3")
+
+```
+
+### - EXAMPLE 1: assign/store a vector of values
+```{r}
+x <- c(21, -3, .003)
+x
+(y <- c('X1', 'X2', 'Y1', 'Y2'))   
+# putting the assingment in parentheses "()" is equivalent to print() ... print on screen 
+```
+
+### - EXAMPLE 2: extract variable 'age' and 'occ' from the incex data frame
+```{r}
+# incex[, c('age', 'occ')]  # character strings 'age' and 'occ' need to be combined
+head(incex[, c('age', 'occ')])
+```
+
+### - EXAMPLE 3: extract rows and columns from a data frame 
+  - use the sequence operator ':'
+  
+```{r}
+1:3                  # sequence of integers from 1 to 3; is the same as c(1, 2, 3)
+3:1                  # sequence of integers from 3 to 1; is the same as c(3, 2, 1)
+-25:-78
+?':'                 # get help for ':'; need quotes since the colon is a special symbol
+
+incex[1:10, c('age', 'occ')]  
+incex[1:10, c(2, 4)]
+incex[c(1:10, 20:25), c(2, 4)]
+
+c(1:10, 20:25)
+```
+
+### the "sequence" function seq()
+```{r}
+?seq
+seq(from = 1, to = 3, by = 1)
+seq(from = 1, by = 1, to = 3)
+seq(1, 3, 1)         # don't need the argument names if we list arguments in default order
+
+seq(-2, 3, by = .25)
+seq(-2, 3, length = 20)
+```
+
+### - EXAMPLE 1: use seq() for generating quantiles
+```{r}
+?quantile
+seq(0, 1, .25)
+quantile(incex$income, probs = seq(0, 1, .25))   # quartiles
+quantile(incex$income, probs = seq(0, 1, .1))    # deciles
+
+seq(0, 1, .1)
+```
+
+### - EXAMPLE 2: use seq() for plotting histograms
+```{r}
+?hist
+hist(incex$income, breaks = seq(500, 2500, 100)) # bin-width of 100 EUR 
+hist(incex$income, breaks = seq(500, 2500, 50))  # bin-width of 50 EUR
+```
+
+### - EXAMPLE 3: use seq() for generating names (e.g., for factor levels or plotting)
+```{r}
+?paste
+paste('age:', seq(15, 70, 5))        # paste() builds a vector of character strings 
+paste('age: ', seq(15, 70, 5), '-', seq(19, 74, 5), ' years', sep = '')
+                       # shorter vectors (e.g., 'age', '-', are automatically recycled!
+```
+
+### the "replicate" function rep()
+```{r}
+rep(7, times = 10)
+rep(7, 10)
+rep(1:3, 10)
+rep(1:3, each = 10)
+rep(1:3, c(2, 5, 7))
+?rep
+
+rep(c(5, -1, 3, 0), each = 3)
+rep(c('one', 'two', 'three'), 1:3)   # works also with character strings
+```
+
+### - EXAMPLE: generate a combination of character strings (or create factor combinations)
+
+```{r}
+A <- paste(rep('a', 5), 1:5, sep = '')
+```
+
+
+```{r}
+# two factors A and B with 5 and 10 factor levels each:
+# a1, a2, ..., a5, and b1, b2, ..., b10
+# first, create vector of factor levels:
+(A <- paste(rep('a', 5), 1:5, sep = ''))
+(A <- paste('a', 1:5, sep = ''))     # even shorter (R recycles 'a' five times)
+(B <- paste('b', 1:10, sep = ''))
+
+# second, create all possible combinations of A and B 
+
+
+cbind(rep(A, each = 10), rep(B, 5))  # cbind() binds the two vectors into a column matrix
+cbind(rep(A, each = 10), B)          # shorter: use the recycling rule
+
+# create a vector of character strings (of combinations)
+paste(rep(A, each = 10), rep(B, 5), sep = '*')
+```
+
+
+### Basic Data Manipulations
+
+### Accessing a data frame (selecting columns & rows)
+
+```
+incex$age          # selects 'age'-variable using $
+incex[, 'age']     # selects 'age'-variable using [..]
+incex[, 2]         # selects 2nd column
+```
+
+```{r}
+incex[1:10, ]        # selects rows 1 to 10
+incex[1:10, 2]       # selects rows 1 to 10 of age
+incex[1:10, 'age']   # selects rows 1 to 10 of age
+incex$age[1:10]      # first select age then rows 1 to 10
+```
+
+### - EXAMPLE: select a random sample of 20 observations
+```{r}
+smpl.ind <- sample(1:nrow(incex), size = 20)
+smpl.ind
+incex[smpl.ind, ] 
+# alternatively (without creating the smpl.ind object):
+incex[sample(1:nrow(incex), size = 20), ]  
+```
+
+### Selecting subsets of data using indices
+```{r}
+age <- incex$age     # creates new object of name "age" (ie, creates a copy)
+dim(age)             # does not work since age is no longer a data frame but a vector
+length(age)
+age[10:20]           # only one argument in brackets since a vector has only 
+                     # one dimension (rows)
+age[seq(1, length(age), by = 5)]  # select each 5th value (starting with first obs.)
+age[-(10:1700)]      # all values except values #10 to #1700
+age[-c(1:9, 21:length(age))]      # all values except ...
+```
+
+### Sorting data 
+```{r}
+                     # sort age from the smallest to largest value
+                     # note: the age variable 'age' remains unsorted since we
+sort(age)            # didn't save the sorted vector: age <- sort(age)
+order(age)           # returns the sorting index (for sorting)
+                     # the first element implies that the samllest one is located on...
+rank(age)            # return the rank (with ties)
+```
+
+### Selecting subsets of a vector using logical vectors
+```{r}
+inc <- incex$income
+age <- incex$age
+age.ord <- order(age)
+inc[age.ord[1:10]]               # income of the 10 youngest employees
+inc[age == 18]                   # income of 18 years old employees
+head(age == 18)                  # creates a logical vector (TRUE, FALSE) and return the first six elements
+inc[age >= 60]                   # income of 60 year old or older employees
+inc[age <= 30 | age >= 60]       # income of 30 year old or younger, or 60 years or older employees
+```
+
+### Selecting a subset of a data frame
+```{r}
+incex[age == 18, c('income', 'edu')]  # select income and educ. level for empl. of age 18
+
+incex18 <- subset(incex, age == 18)   # creates a subset of incex 
+                                      # (only of 18y old employees)
+incex18
+
+# also select variables
+subset(incex, age == 18, c(age, edu, occ))
+subset(incex, age == 18, age:occ)
+```
+
+### Assigning values to selected cells 
+```{r}
+age[1:10]
+age[c(3, 7)] <- 0      # assign age of 0 to 3rd and 7th observation
+age[1:10]
+age[age < 18] <- NA    # assign a missing value (Not Available) to age values less than 18
+age[1:10]
+```
+
+
+## 7. Logical Operators
+
+```{r}
+TRUE                 # TRUE
+FALSE                # FALSE
+!TRUE                # ! ... logical negation (NOT TRUE)
+!FALSE               # ! ... logical negation (NOT FALSE)
+1 == 1               # == ... EQUAL
+1 == 2
+1 != 2               # != ... NOT EQUAL
+'apple' == 'apple'   # logical operations also work for character strings
+'apple' == 'orange'
+'apple' != 'orange'
+
+c(3, 7, 8) == 7      # logical operation with vectors (elementwise)
+7 == c(3, 7, 8)
+c(3, 7, 8) == c(1, 3, 8)
+c(3, 7, 8) == c(1, 3, 8, 5, 7, 3)  # automatically recycles shorter vector (no warning!!!)
+c(3, 7, 8) == c(1, 3, 8, 5, 7)     # automatically recycles shorter vector (warning message)
+
+TRUE & TRUE          # & ... logical AND
+TRUE & FALSE
+FALSE & FALSE
+TRUE | TRUE          # | ... logical OR
+TRUE | FALSE
+FALSE | FALSE
+1 == 1 & 'apple' == 'orange'
+1 == 1 | 'apple' == 'orange'
+```
+
+
+## 8. Missing data
+
+```{r}
+# ::::: checking for missing values (NA: not available) & selecting complete data :::::
+# is.na(incex)         # check for missing values "is not available (na)?"
+head(is.na(incex))
+any(is.na(incex))    # check whether there are any missing values
+sum(is.na(incex))    # how many missing values? (TRUE=1 and FALSE=0)
+
+# EXAMPLE: data frame with NAs
+x.df <- data.frame(a = c(5, 3, 9, NA, 0), b = c(NA, 8, 7, 1, 1))  # generate a data frame
+x.df
+is.na(x.df)
+any(is.na(x.df))
+sum(is.na(x.df))
+x.df.complete <- na.omit(x.df)  # deletes all rows with a missing (NA)
+x.df.complete
+```
+
+## 9. Other Data Manipulations
+
+### Change order of levels for edu & occ
+```{r}
+summary(incex)       # summary stats for each variable of a data frame 
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'))
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'))
+incex$sex <- factor(incex$sex, levels = c('m', 'f'), labels = c('male', 'female'))
+summary(incex)
+
+head(incex$occ)
+head(incex$edu)
+incex$edu >= 'med.'  # does not work since no order is defined!
+
+# create ordered factor levels (for ordinal variables)
+incex$occ <- factor(incex$occ, levels = c('low', 'med.', 'high'), ordered = T)
+incex$edu <- factor(incex$edu, levels = c('low', 'med.', 'high'), ordered = T)
+head(incex$occ)
+head(incex$edu)
+incex$edu >= 'med.'
+```
+
+### Use the transform() or within() functions
+```{r}
+# read data again (in order to get original occ, edu and sex variables)
+incex <- read.table('income_exmpl.dat', header = T, sep = "\t")
+summary(incex)
+
+incex <- transform(incex, 
+   occ = factor(occ, levels = c('low', 'med.', 'high')),
+   edu = factor(edu, levels = c('low', 'med.', 'high')),
+   sex = factor(sex, levels = c('m', 'f'), labels = c('male', 'female'))
+)
+summary(incex)
+
+
+# read data again (in order to get original occ, edu and sex variables)
+incex <- read.table('income_exmpl.dat', header = T, sep = "\t")
+summary(incex)
+
+incex <- within(incex, {
+   occ <- factor(occ, levels = c('low', 'med.', 'high'))
+   edu <- factor(edu, levels = c('low', 'med.', 'high'))
+   sex <- factor(sex, levels = c('m', 'f'), labels = c('male', 'female'))
+})
+summary(incex)
+```
+
+### Clean up - delete objects
+
+```{r}
+objects()
+rm(x, y, age, inc, age.ord, incex18, x.df, x.df.complete)
+objects()
+```
+
+
+## 10. Basic Computing with Data
+
+### Simple statistics for a data vector
+```{r}
+table(incex$edu)    
+mean(incex$age)      
+median(incex$age)
+range(incex$age)
+quantile(incex$age)
+summary(incex$age)
+summary(incex$edu)
+
+mean(incex$income)
+mean(incex$income[incex$edu == 'low'])  # mean for a subset
+tapply(incex$income, incex$edu, mean)   # means by educational level
+tapply(incex$income, list(incex$edu, incex$occ), mean)  # by education & occ. status
+tapply(incex$income, list(incex$edu, incex$occ), sd)    # corresp. standard dev.
+```
+
+### Use with() or attach() and detach()
+```{r}
+# alternatively use with() instead of repeated 'incex$"
+with(incex, tapply(income, edu, mean))
+with(incex, tapply(income, list(edu, occ), mean))
+
+# or attach() and detach()
+# income               # not found since "income" only exist within "incex"
+attach(incex)        # makes all variable of the incex data frame available
+head(income)
+tapply(income, edu, mean)
+tapply(income, list(edu, occ), mean)
+detach(incex)        # after you are done, detach data set
+# income
+
+# !!! WARNING: in order to avoid confusions when manipulating data
+# avoid using attach() and detach() !!! But attaching data is useful for plotting.     
+```
+
+
+## 11. Writing Simple Functions
+
+```{r}
+# ::::: mean value & standard dev. :::::
+mean.val <- function(x)
+{
+   # computes mean value of vector x
+   sum(x) / length(x)
+}
+
+mean.val             # without (), prints the body of the function
+
+mean.val(incex$income)
+mean(incex$income)
+
+sd.val <- function(x)
+{
+   # computes standard deviation of vector x
+   sqrt(sum((x - mean.val(x))^2) / (length(x) - 1))
+}
+
+sd.val(incex$income)
+sd(incex$income)
+
+# define your own my.summary() function
+my.summary <- function(x)
+{
+   # returns mean, sd, n, and standard error
+   # x ... numeric vector (no missings allowed)
+
+   m <- mean.val(x)
+   s <- sd.val(x)
+   n <- length(x)
+   se <- s / sqrt(n)  # standard error
+   c(mean = m, std.dev = s, n = n, s.e. = se)
+}
+
+my.summary(incex$income)
+```
+
+
+## 12. Visualizing Data
+
+### Histogram & kernel density estimation
+```{r}
+attach(incex)        # attaches a data frame such that variables (colums)
+                     # are directly accessible by their name
+                     # after you no longer need the attached data frame detach() it
+
+hist(income)
+hist(income, prob = T)
+lines(density(income), col = 'red')  # kernel density estimate; lines() adds lines to the active plot
+
+detach(incex)        # detaches the incex data frame
+
+
+library(lattice)     # load "lattice"-package: more fancy histograms and density plots
+                     # most convenient with formula method
+histogram(~ income, data = incex)
+histogram(~ income | sex, data = incex)        # plot income by sex
+histogram(~ income | sex * edu, data = incex)  # plot income by sex x edu
+densityplot(~ income, data = incex)
+densityplot(~ income | sex, data = incex)
+densityplot(~ income | sex * edu, data = incex)
+```
+
+### Barplot
+```{r}
+barplot(table(incex$occ), main = 'occupational status')
+barplot(table(incex$edu), main = 'education')
+plot(~ occ, data = incex)      # alternative way
+
+table(incex$age)
+plot(occ ~ age, data = incex)   # plot calls spineplot
+spineplot(occ ~ age, data = incex)
+cdplot(occ ~ age, data = incex) # conditional density plot
+
+barplot(table(incex$occ, incex$edu), main = 'occupational status', xlab="edu", ylab="occ")
+barplot(prop.table(table(incex$occ, incex$edu), 2), main = 'occupational status', xlab="edu", ylab="occ")
+plot(occ ~ edu, data = incex)
+plot(occ ~ edu + sex, data = incex)  # need mouse or keyboard entry to confirm page change
+
+mosaicplot(occ ~ edu, data = incex)
+mosaicplot(edu ~ occ, data = incex)
+mosaicplot(occ ~ edu + sex, data = incex)
+mosaicplot(occ ~ edu + sex, data = incex, color = c('blue', 'red'))
+mosaicplot(~ occ + edu + sex, data = incex)  # alternative formula
+```
+
+### Scatter Plot
+```{r}
+plot(income ~ oexp, data = incex)
+coplot(income ~ oexp | edu, data = incex)
+coplot(income ~ oexp | edu * occ, data = incex)
+
+# from the "lattice"-package
+xyplot(income ~ oexp, data = incex)
+xyplot(income ~ oexp | edu, data = incex)
+xyplot(income ~ oexp | edu * occ, data = incex)
+```
+
+## 13. Basic Tables
+
+```{r}
+sapply(incex, mean)
+sapply(incex, class)
+sapply(incex, function(x) sum(is.na(x)))
+apply(incex, 2, function(x) sum(is.na(x)))
+apply(incex, 1, function(x) sum(is.na(x)))
+```
+
+### Create tables
+```{r}
+xtabs(~ occ + edu, data = incex)  # with formula method
+xtabs(~ sex, data = incex)
+xtabs(income ~ sex, data = incex) # sum of income
+xtabs(income ~ sex, data = incex) / xtabs( ~ sex, data = incex) # mean income by sex
+with(incex, tapply(income, sex, mean))
+with(incex, tapply(income, list(occ, edu), mean))
+```
+
+### Compare group means
+```{r}
+with(incex, tapply(income, sex, summary))
+with(incex, tapply(income, sex, mean))
+with(incex, tapply(income, sex, sd))
+with(incex, tapply(income, sex, sd) / sqrt(c(table(sex))))  # s.e.
+
+boxplot(income ~ sex, data = incex, varwidth = T, horizontal = T)
+boxplot(income ~ sex, data = incex, varwidth = F, horizontal = T)
+
+t.test(income ~ sex, data = incex)
+t.test(income ~ sex, data = incex, var.equal = T)
+```
+
+### Crosstables
+```{r}
+with(incex, table(sex))
+tab <- with(incex, table(sex, edu))
+tab
+plot(sex ~ edu, data = incex)
+chisq.test(tab)
+
+tab <- with(incex, table(occ, edu))
+tab
+plot(occ ~ edu, data = incex)
+chisq.test(tab)
+
+tab <- with(incex, table(occ, edu, sex))
+tab
+addmargins(tab)         # add totals to table
+ftable(tab)             # print a better formated table
+ftable(addmargins(tab))
+mosaicplot(occ ~ edu + sex, data = incex)
+```
+
+
+## 14. Basic Data Structures
+
+### Vectors (numeric & character)
+```{r}
+(v <- c(3, -2, 13, 10.5))
+is.vector(v)
+is.matrix(v)
+length(v)
+v[3:4]
+
+(v2 <- c('a', 'b', 'c', 'b'))
+is.vector(v2)
+length(v2)
+v2[3:4]
+
+names(v) <- names(v2) <- 1:4
+v
+v2
+```
+
+### Factor 
+```{r}
+(f <- factor(c(0, 1, 1, 0)))
+(f <- factor(c(0, 1, 1, 0), labels = c('male', 'female')))
+is.factor(f)
+length(f)
+f[3:4]
+
+(f2 <- as.factor(v2))      # transform a character vector into a factor
+```
+
+### Matrix
+```{r}
+(m <- matrix(1:20, nrow = 4, ncol = 5))
+is.matrix(m)
+dim(m)
+m[2:3, 3:4]
+
+dimnames(m) <- list(1:4, paste('X', 1:5, sep = ''))
+m
+m[2:3, c('X3', 'X4')]
+
+(m2 <- cbind(v, m))        # create a matrix by binding columns together
+is.matrix(m2)
+is.data.frame(m2)
+
+(m3 <- cbind(v, v2, f, m)) # matrix of character strings
+```
+
+### Data frame
+```{r}
+(d <- data.frame(v, v2, f, m))
+is.data.frame(d)
+is.matrix(d)
+dim(d)
+d[2:3, c('X3', 'X4')]
+d[, 'X3']                  # select variable X3
+d$X3                       # alternative way to select X3
+# m3$X3                      # does not work for matrices, only works for data frames
+
+dimnames(d)                # names can be changed as for the matrix above
+```
+
+### List
+```{r}
+(l <- list(v, v2, f, m))   # list with four list elements
+is.list(l)
+length(l)
+l[4]                       # fourth list element returned as a list of length 1 (containing a matrix)
+l[[4]]                     # fourth list element returned as matrix
+
+(l <- list(V1 = v, V2 = v2, sex = f, data = m))   # list with assigned names
+l$sex
+```
