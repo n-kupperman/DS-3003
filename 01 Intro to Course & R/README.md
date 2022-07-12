@@ -9,4 +9,4 @@
 * Intro to R Lecture/Lab
 
 ## Assignment: Due Sunday 8/28 @ 11:59pm
-* [Intro to R assignment](https://myuva-my.sharepoint.com/:f:/g/personal/nak5dy_virginia_edu/Courses/DS2003/assignments/assignment1?download=1)
+* [Intro to R assignment](https://myuva-my.sharepoint.com/:f:/g/personal/nak5dy_virginia_edu/ErheKzeWp4ZDl063KnLRSycBUh8rg8OKWGj1ve6cXlddiw)
