@@ -83,9 +83,9 @@ This course will be a combination of lectures and labs. As the course progresses
 | Week 2  | 3             | 8/30      | Lecture: Descriptive Stats   	      |  	    | 	                        |       
 | Week 2  | 4             | 9/1       | Lab: Intro to R                       |         |                           |
 | Week 3  | 5             | 9/6       |	Lecture: Research Fallacies           |  	    |  	                        |  	
-| Week 3  | 6             | 9/8       | Lab: Intro to R                       |         |                           |
-| Week 4  | 7             | 9/13      | Lecture/Lab: Data Viz in Base R       |         |                           |	
-| Week 4  | 8             | 9/15      | Lecture/Lab: Data Viz in ggplot2      |         |                           |
+| Week 3  | 6             | 9/8       | Lecture/Lab: Data Viz in Base R       |         |                           |
+| Week 4  | 7             | 9/13      | Lecture/Lab: Data Viz in ggplot2      |         |                           |	
+| Week 4  | 8             | 9/15      | Lab: Data Viz in Base R & ggplot2     |         |                           |
 | Week 5  | 9             | 9/20      | Lecture: Linear Regression            | 	    |                           |
 | Week 5  | 10            | 9/22.     | Lab: Linear Regression                |         |                           |
 | Week 6  | 11            | 9/27      | Lecture: Data Formats & R Markdown    |         |                           | 
